@@ -1,0 +1,73 @@
+/*
+ *    Copyright 2019 the original author or authors.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
+package com.github.noproxy.gradle.test.internal;
+
+import org.codehaus.groovy.runtime.ResourceGroovyMethods;
+import org.gradle.api.Action;
+import org.gradle.util.ClosureBackedAction;
+
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+
+import groovy.lang.Closure;
+
+public class Actions {
+    public static Action<File> setText(String text) {
+        return file -> {
+            try {
+                ResourceGroovyMethods.setText(file, text, "UTF-8");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    public static Action<File> appendText(String text) {
+        return file -> {
+            try {
+                ResourceGroovyMethods.append(file, text, "UTF-8");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    public static <T> Action<T> of(Closure<?> closure) {
+        return ClosureBackedAction.of(closure);
+    }
+
+    public static Action<File> createFile() {
+        return file -> {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    public static Action<Closeable> close() {
+        return closeable -> {
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+}

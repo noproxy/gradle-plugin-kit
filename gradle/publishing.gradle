@@ -1,0 +1,75 @@
+apply plugin: 'maven-publish'
+
+task sourcesJar(type: Jar) {
+    group = "build"
+    archiveClassifier.set("sources")
+    from(sourceSets.main.allSource) {
+        include("**/api/**.java")
+    }
+    dependsOn(tasks.named("classes"))
+}
+
+task javadocJar(type: Jar) {
+    group = "build"
+    archiveClassifier.set("javadoc")
+    def javadoc = tasks.getByName("javadoc") as Javadoc
+    from(javadoc.destinationDir)
+    dependsOn(javadoc)
+}
+
+task groovydocJar(type: Jar) {
+    group = "build"
+    archiveClassifier.set("groovydoc")
+    def groovydoc = tasks.getByName("groovydoc") as Groovydoc
+    from(groovydoc.destinationDir)
+    dependsOn(groovydoc)
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "BuildDir"
+            url = uri(rootProject.file("build/repo"))
+        }
+    }
+    publications.withType(MavenPublication).all {
+        artifact(tasks.getByName("groovydocJar"))
+        artifact(tasks.getByName("javadocJar"))
+        artifact(tasks.getByName("sourcesJar"))
+
+        if (name != "pluginMaven") {
+            artifact(tasks.getByName("jar"))
+        }
+    }
+
+}
+
+apply plugin: "com.github.breadmoirai.github-release"
+
+githubRelease {
+    if (project.hasProperty('github.publish.token')) {
+        token getProperty('github.publish.token')
+    }
+    repo project.name
+    draft true
+    prerelease true
+    releaseAssets jar, sourcesJar, javadocJar, groovydocJar
+    body "Incontributing release."
+}
+
+/*
+Usage:
+
+// register any publication to publish to maven repository
+publishing {
+    publications {
+        lib(MavenPublication)
+    }
+}
+
+// set repo name and release note to publish to github releases
+githubRelease {
+    repo 'name'
+    body "Incontributing release."
+}
+ */
