@@ -68,7 +68,7 @@ githubRelease {
     } else {
         logger.warn("set 'github.publish.token' in gradle.properties to publish github releases")
     }
-    repo rootProject.name
+    repo project.name
     draft byProperty("draft")
     prerelease isPreRelease()
     overwrite true
@@ -99,6 +99,6 @@ publishing {
 // set repo name and release note to publish to github releases
 githubRelease {
     repo 'name'
-    body "Incontributing release."
+    body "Incubating release."
 }
  */

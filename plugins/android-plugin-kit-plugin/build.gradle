@@ -42,8 +42,8 @@ tasks.withType(Test) {
     }
 }
 // publishing
-assert ("android-plugin-kit-plugin" == name)
 assert ("com.github.noproxy" == group)
+assert ("android-plugin-kit-plugin" == name)
 version = "0.0.1"
 
 apply from: rootProject.file("gradle/publishing.gradle")
@@ -55,7 +55,7 @@ githubRelease {
 gradlePlugin {
     plugins {
         create("androidPluginKitPlugin") {
-            id = "com.github.noproxy.${project.name}"
+            id = "${group}.${project.name}"
             implementationClass = "com.github.noproxy.android.plugin.AndroidPluginKitPlugin"
         }
     }

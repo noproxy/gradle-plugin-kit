@@ -36,8 +36,8 @@ dependencies {
 }
 
 // publishing
+assert ("com.github.noproxy" == group)
 assert ("test-kit-ext" == name)
-assert ("io.github.noproxy" == group)
 version = "0.0.6"
 
 apply from: rootProject.file("gradle/publishing.gradle")
@@ -49,6 +49,6 @@ publishing {
 }
 
 githubRelease {
-    repo rootProject.name
-    body "Incontributing release."
+    repo project.name
+    body "Incubating release."
 }
