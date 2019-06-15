@@ -16,7 +16,6 @@
 
 package com.github.noproxy.android.plugin;
 
-import com.android.build.gradle.api.AndroidBasePlugin;
 import com.github.noproxy.android.plugin.internal.AndroidPluginKitExtensionInternal;
 import com.github.noproxy.android.plugin.internal.AndroidSdkProvider;
 import com.github.noproxy.android.plugin.internal.AndroidSdkProviderFactory;
@@ -26,6 +25,7 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.testing.Test;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("unused")
 public class AndroidPluginKitPlugin implements Plugin<Project> {
@@ -47,11 +47,25 @@ public class AndroidPluginKitPlugin implements Plugin<Project> {
      */
     private void configureAndroidSdkForTests(Project project, AndroidPluginKitExtensionInternal extension) {
         final AndroidSdkProvider sdkProvider = new AndroidSdkProviderFactory(extension).createSdkProvider();
-        project.getPlugins().withType(AndroidBasePlugin.class, androidBasePlugin -> {
-            project.getTasks().withType(Test.class).all(test -> {
-                final String sdkHome = sdkProvider.getSdkHome();
-                test.systemProperty("android.home", sdkHome);
+        final Class<? extends Plugin> androidBasePluginClass = getAndroidBasePluginClass();
+        if (androidBasePluginClass != null) {
+            project.getPlugins().withType(androidBasePluginClass, androidBasePlugin -> {
+                project.getTasks().withType(Test.class).all(test -> {
+                    final String sdkHome = sdkProvider.getSdkHome();
+                    test.systemProperty("android.home", sdkHome);
+                });
             });
-        });
+        }
+    }
+
+    @Nullable
+    private Class<? extends Plugin> getAndroidBasePluginClass() {
+        try {
+            //noinspection unchecked
+            return (Class<? extends Plugin>) Class.forName("com.android.build.gradle.api.AndroidBasePlugin",
+                    false, this.getClass().getClassLoader());
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
     }
 }
