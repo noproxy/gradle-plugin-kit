@@ -14,14 +14,8 @@
  *    limitations under the License.
  */
 
+package com.github.noproxy.android.plugin.internal;
 
-include("test-kit-annotations")
-include("test-kit-ext")
-
-val plugins = listOf("tinker-maven-publish", "android-plugin-kit-plugin")
-for (name in plugins) {
-    include(name)
-    project(":$name").projectDir = file("plugins/$name")
+public interface AndroidSdkProvider {
+    String getSdkHome();
 }
-
-rootProject.name = "gradle-plugin-kit"

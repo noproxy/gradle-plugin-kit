@@ -275,7 +275,9 @@ $RECYCLE.BIN/
 /.idea/.name
 !/gradle/wrapper/gradle-wrapper.jar
 
-/plugins/**/**
 /.idea/inspectionProfiles/Project_Default.xml
 .idea/dictionaries/*.xml
 !/.idea/dictionaries/shared.xml
+
+# External Project
+/plugins/tinker-maven-publish

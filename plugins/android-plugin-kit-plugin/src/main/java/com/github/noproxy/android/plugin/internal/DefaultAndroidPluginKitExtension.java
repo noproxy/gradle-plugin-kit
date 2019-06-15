@@ -14,14 +14,23 @@
  *    limitations under the License.
  */
 
+package com.github.noproxy.android.plugin.internal;
 
-include("test-kit-annotations")
-include("test-kit-ext")
+import com.github.noproxy.android.plugin.AndroidPluginKitExtension;
 
-val plugins = listOf("tinker-maven-publish", "android-plugin-kit-plugin")
-for (name in plugins) {
-    include(name)
-    project(":$name").projectDir = file("plugins/$name")
+import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
+
+public class DefaultAndroidPluginKitExtension implements AndroidPluginKitExtension, AndroidPluginKitExtensionInternal {
+    @Nullable
+    @Override
+    public File getTestAndroidSdk() {
+        return null;
+    }
+
+    @Override
+    public void setTestAndroidSdk(Object object) {
+
+    }
 }
-
-rootProject.name = "gradle-plugin-kit"

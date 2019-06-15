@@ -14,14 +14,13 @@
  *    limitations under the License.
  */
 
+package com.github.noproxy.android.plugin.internal;
 
-include("test-kit-annotations")
-include("test-kit-ext")
+import org.jetbrains.annotations.Nullable;
 
-val plugins = listOf("tinker-maven-publish", "android-plugin-kit-plugin")
-for (name in plugins) {
-    include(name)
-    project(":$name").projectDir = file("plugins/$name")
+import java.io.File;
+
+public interface AndroidPluginKitExtensionInternal {
+    @Nullable
+    File getTestAndroidSdk();
 }
-
-rootProject.name = "gradle-plugin-kit"

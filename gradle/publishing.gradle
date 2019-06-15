@@ -65,12 +65,24 @@ apply plugin: "com.github.breadmoirai.github-release"
 githubRelease {
     if (project.hasProperty('github.publish.token')) {
         token getProperty('github.publish.token')
+    } else {
+        logger.warn("set 'github.publish.token' in gradle.properties to publish github releases")
     }
-    repo project.name
-    draft true
-    prerelease true
+    repo rootProject.name
+    draft byProperty("draft")
+    prerelease isPreRelease()
     releaseAssets jar, sourcesJar, javadocJar, groovydocJar
-    body "Incontributing release."
+    body "Incubating release."
+}
+
+def isPreRelease() {
+    def version = project.version.toString()
+    return version.contains('-') || version.startsWith('0')
+}
+
+def byProperty(String key, boolean defaultValue = true) {
+    def value = properties.getOrDefault(key, defaultValue)
+    return Boolean.parseBoolean(value.toString())
 }
 
 /*

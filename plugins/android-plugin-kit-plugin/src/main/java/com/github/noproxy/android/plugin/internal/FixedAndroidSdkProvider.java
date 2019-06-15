@@ -14,14 +14,19 @@
  *    limitations under the License.
  */
 
+package com.github.noproxy.android.plugin.internal;
 
-include("test-kit-annotations")
-include("test-kit-ext")
+import java.io.File;
 
-val plugins = listOf("tinker-maven-publish", "android-plugin-kit-plugin")
-for (name in plugins) {
-    include(name)
-    project(":$name").projectDir = file("plugins/$name")
+public class FixedAndroidSdkProvider implements AndroidSdkProvider {
+    private final File androidHome;
+
+    public FixedAndroidSdkProvider(File androidHome) {
+        this.androidHome = androidHome;
+    }
+
+    @Override
+    public String getSdkHome() {
+        return androidHome.getAbsolutePath();
+    }
 }
-
-rootProject.name = "gradle-plugin-kit"
