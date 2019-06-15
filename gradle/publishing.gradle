@@ -71,6 +71,7 @@ githubRelease {
     repo rootProject.name
     draft byProperty("draft")
     prerelease isPreRelease()
+    overwrite true
     releaseAssets jar, sourcesJar, javadocJar, groovydocJar
     body "Incubating release."
 }
