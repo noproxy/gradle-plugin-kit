@@ -18,12 +18,13 @@ import com.github.noproxy.built.HamcrestCapability
 
 buildscript {
     repositories {
-        maven {
-            url = uri("https://plugins.gradle.org/m2/")
-        }
+        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url 'https://jitpack.io' }
+        mavenLocal()
     }
     dependencies {
         classpath("gradle.plugin.com.github.breadmoirai:github-release:2.2.9")
+        classpath("com.github.noproxy:android-plugin-kit-plugin:0.0.1")
     }
 }
 
