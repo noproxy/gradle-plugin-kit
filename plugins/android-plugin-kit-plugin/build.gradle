@@ -38,7 +38,7 @@ dependencies {
 
 tasks.withType(Test) {
     doFirst {
-        file("build/tmp/testfiles").deleteRecursively()
+        file("build/tmp/testfiles").deleteDir()
     }
 }
 // publishing
