@@ -14,32 +14,22 @@
  *    limitations under the License.
  */
 
-package com.github.noproxy.gradle.test.api;
+package com.github.noproxy.gradle.test.api.extension;
 
-import com.github.noproxy.gradle.test.internal.Closer;
+import org.gradle.api.Action;
 
-@Closer
-public interface BuildRunner {
-    void buildArgument(String... additionArguments);
+import groovy.lang.Closure;
 
-    void quiet();
+public class KitDefaultMethods {
+    public static <T> T configure(T self, Action<T> configureAction) {
+        configureAction.execute(self);
+        return self;
+    }
 
-    @Closer
-    void run(String... tasksAndArguments);
+    public static <T> T configure(T self, Closure configureAction) {
+        configureAction.setDelegate(self);
+        configureAction.call(self);
+        return self;
+    }
 
-    String getOutput();
-
-    @Closer
-    void assemble(String... additionArguments);
-
-    @Closer
-    void configure(String... additionArguments);
-
-    void fail();
-
-    void success();
-
-    boolean isEnableStackTrace();
-
-    void setEnableStackTrace(boolean enable);
 }

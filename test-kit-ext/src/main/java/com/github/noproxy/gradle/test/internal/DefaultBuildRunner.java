@@ -26,6 +26,7 @@ import org.gradle.testkit.runner.internal.DefaultGradleRunner;
 import org.junit.Assert;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class DefaultBuildRunner implements BuildRunner {
@@ -35,8 +36,19 @@ public class DefaultBuildRunner implements BuildRunner {
     private String output;
     private BuildResult result;
     private Throwable throwable = null;
+    private boolean enableStackTrace = true;
 
+    @Override
+    public void buildArgument(String... additionArguments) {
+        Collections.addAll(appendArguments, additionArguments);
+    }
 
+    @Override
+    public void quiet() {
+        buildArgument("--quiet");
+    }
+
+    @ParamertersWillBeClosed
     public DefaultBuildRunner(FileIntegrator integrator) {
         this.integrator = integrator;
         gradleRunner = new DefaultGradleRunner();
@@ -47,6 +59,14 @@ public class DefaultBuildRunner implements BuildRunner {
                 .forwardOutput();
     }
 
+    private static String[] plusArguments(String first, String... others) {
+        final String[] strings = new String[others.length + 1];
+        strings[0] = first;
+        System.arraycopy(others, 0, strings, 1, others.length);
+        return strings;
+    }
+
+    @Closer
     @Override
     public void run(String... arguments) {
         Actions.close().execute(integrator);
@@ -58,7 +78,7 @@ public class DefaultBuildRunner implements BuildRunner {
 
         final ArrayList<String> computed = Lists.newArrayList(arguments);
         computed.addAll(appendArguments);
-        if (!computed.contains("--stacktrace")) {
+        if (isEnableStackTrace() && !computed.contains("--stacktrace")) {
             computed.add("--stacktrace");
         }
 
@@ -90,14 +110,25 @@ public class DefaultBuildRunner implements BuildRunner {
         Assert.assertNull(throwable);
     }
 
-
+    @Closer
     @Override
-    public void assemble() {
-        run("assemble");
+    public void assemble(String... additionArguments) {
+        run(plusArguments("assemble", additionArguments));
+    }
+
+    @Closer
+    @Override
+    public void configure(String... additionArguments) {
+        run(plusArguments("help", additionArguments));
     }
 
     @Override
-    public void configure() {
-        run("help");
+    public boolean isEnableStackTrace() {
+        return enableStackTrace;
+    }
+
+    @Override
+    public void setEnableStackTrace(boolean enable) {
+        this.enableStackTrace = enable;
     }
 }

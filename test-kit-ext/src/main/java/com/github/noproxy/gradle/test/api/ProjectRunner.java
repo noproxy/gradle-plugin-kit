@@ -18,28 +18,13 @@ package com.github.noproxy.gradle.test.api;
 
 import com.github.noproxy.gradle.test.internal.Closer;
 
+import org.gradle.api.Project;
+
 @Closer
-public interface BuildRunner {
-    void buildArgument(String... additionArguments);
-
-    void quiet();
+public interface ProjectRunner {
+    @Closer
+    Project getRootProject();
 
     @Closer
-    void run(String... tasksAndArguments);
-
-    String getOutput();
-
-    @Closer
-    void assemble(String... additionArguments);
-
-    @Closer
-    void configure(String... additionArguments);
-
-    void fail();
-
-    void success();
-
-    boolean isEnableStackTrace();
-
-    void setEnableStackTrace(boolean enable);
+    Project getRootProject(String name);
 }

@@ -20,8 +20,11 @@ import com.github.noproxy.gradle.test.api.AndroidIntegrator;
 import com.github.noproxy.gradle.test.api.FileIntegrator;
 import com.github.noproxy.gradle.test.api.ProjectIntegrator;
 
+import org.gradle.api.Action;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import groovy.lang.Closure;
 
@@ -48,6 +51,26 @@ public class DefaultProjectIntegrator implements ProjectIntegrator {
         final File buildFile = buildFile();
         closure.setDelegate(buildFile);
         closure.call();
+    }
+
+    @Override
+    public File properties() {
+        return integrator.newFile("gradle.properties");
+    }
+
+    @Override
+    public File properties(Action<File> action) {
+        return integrator.newFile("gradle.properties", action);
+    }
+
+    @Override
+    public void property(Map<String, String> properties) {
+        properties.forEach(this::property);
+    }
+
+    @Override
+    public void property(String propertyKey, String propertyValue) {
+        properties(Actions.appendText(propertyKey + "=" + propertyValue + "\n"));
     }
 
     @Override

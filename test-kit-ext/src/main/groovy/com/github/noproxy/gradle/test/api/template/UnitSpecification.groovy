@@ -16,25 +16,23 @@
 
 package com.github.noproxy.gradle.test.api.template
 
-import com.github.noproxy.gradle.test.api.BuildRunner
 import com.github.noproxy.gradle.test.api.FileIntegrator
 import com.github.noproxy.gradle.test.api.ProjectIntegrator
+import com.github.noproxy.gradle.test.api.ProjectRunner
 import com.github.noproxy.gradle.test.internal.*
 import org.junit.Rule
 import spock.lang.Specification
 
 @CleanupTestDirectory
-class IntegrateSpecification extends Specification {
+class UnitSpecification extends Specification {
     @Rule
     TestNameTestDirectoryProvider testDirectoryProvider = new TestNameTestDirectoryProvider()
-
     @Delegate(parameterAnnotations = true)
     private FileIntegrator integrator = new DefaultFileIntegrator(testDirectoryProvider.getTestDirectory())
-
     @Delegate(parameterAnnotations = true)
     private ProjectIntegrator project = new DefaultProjectIntegrator(integrator)
-
+    //TODO properties useless
     @Closer
     @Delegate(parameterAnnotations = true)
-    private BuildRunner runner = new DefaultBuildRunner(integrator)
+    private ProjectRunner runner = new DefaultProjectRunner(integrator)
 }

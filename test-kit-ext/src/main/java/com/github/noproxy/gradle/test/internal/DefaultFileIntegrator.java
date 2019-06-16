@@ -18,6 +18,8 @@ package com.github.noproxy.gradle.test.internal;
 
 import com.github.noproxy.gradle.test.api.FileIntegrator;
 
+import org.gradle.api.Action;
+import org.gradle.api.NonNullApi;
 import org.gradle.internal.impldep.org.testng.collections.Sets;
 
 import java.io.Closeable;
@@ -25,6 +27,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
+import groovy.lang.Closure;
+
+import static com.github.noproxy.gradle.test.api.extension.KitDefaultMethods.configure;
+
+@NonNullApi
 public class DefaultFileIntegrator implements FileIntegrator, FileIntegratorInternal {
     private final File root;
     private final Set<Closeable> children = Sets.newHashSet();
@@ -39,29 +46,76 @@ public class DefaultFileIntegrator implements FileIntegrator, FileIntegratorInte
     }
 
     @Override
+    public File file(String path, Action<File> fileAction) {
+        return configure(file(path), fileAction);
+    }
+
+    @Override
+    public File file(String path, Closure closure) {
+        return configure(file(path), closure);
+    }
+
+    @Override
     public File newDir(String path) {
-        final File dir = new File(getRoot(), path);
-        dir.mkdirs();
-        return dir;
+        return configure(new File(getRoot(), path), Actions.mkdirs());
+    }
+
+    @Override
+    public File newDir(String path, Action<File> fileAction) {
+        return configure(newDir(path), fileAction);
+    }
+
+    @Override
+    public File newDir(String path, Closure closure) {
+        return configure(newDir(path), closure);
     }
 
     @Override
     public File newDir(File file) {
-        file.mkdirs();
-        return file;
+        return configure(file, Actions.mkdirs());
+    }
+
+    @Override
+    public File newDir(File file, Action<File> fileAction) {
+        return configure(newDir(file), fileAction);
+    }
+
+    @Override
+    public File newDir(File file, Closure closure) {
+        return configure(newDir(file), closure);
     }
 
     @Override
     public File newFile(String path) {
-        final File file = file(path);
-        newDir(file.getParentFile());
-        return newFile(file);
+        return configure(file(path), file -> {
+            newDir(file.getParentFile());
+            newFile(file);
+        });
+    }
+
+    @Override
+    public File newFile(String path, Action<File> fileAction) {
+        return configure(newFile(path), fileAction);
+    }
+
+    @Override
+    public File newFile(String path, Closure closure) {
+        return configure(newFile(path), closure);
     }
 
     @Override
     public File newFile(File file) {
-        Actions.createFile().execute(file);
-        return file;
+        return configure(file, Actions.createFile());
+    }
+
+    @Override
+    public File newFile(File file, Action<File> fileAction) {
+        return configure(newFile(file), fileAction);
+    }
+
+    @Override
+    public File newFile(File file, Closure closure) {
+        return configure(newFile(file), closure);
     }
 
     @Override
@@ -71,12 +125,32 @@ public class DefaultFileIntegrator implements FileIntegrator, FileIntegratorInte
 
     @Override
     public FileIntegrator child(String path) {
-        return new DefaultFileIntegrator(newDir(path));
+        return configure(new DefaultFileIntegrator(newDir(path)), this::addCloseable);
+    }
+
+    @Override
+    public FileIntegrator child(String path, Action<FileIntegrator> fileAction) {
+        return configure(child(path), fileAction);
+    }
+
+    @Override
+    public FileIntegrator child(String path, Closure closure) {
+        return configure(child(path), closure);
     }
 
     @Override
     public FileIntegrator child(File file) {
-        return new DefaultFileIntegrator(newDir(file));
+        return configure(new DefaultFileIntegrator(newDir(file)), this::addCloseable);
+    }
+
+    @Override
+    public FileIntegrator child(File file, Action<FileIntegrator> fileAction) {
+        return configure(child(file), fileAction);
+    }
+
+    @Override
+    public FileIntegrator child(File file, Closure closure) {
+        return configure(child(file), closure);
     }
 
     @Override

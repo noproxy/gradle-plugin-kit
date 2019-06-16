@@ -16,8 +16,11 @@
 
 package com.github.noproxy.gradle.test.api;
 
+import org.gradle.api.Action;
+
 import java.io.Closeable;
 import java.io.File;
+import java.util.Map;
 
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
@@ -31,6 +34,14 @@ public interface ProjectIntegrator extends Closeable, AutoCloseable {
             @DelegatesTo(value = File.class,
                     strategy = Closure.DELEGATE_FIRST)
                     Closure closure);
+
+    File properties();
+
+    File properties(Action<File> action);
+
+    void property(String propertyKey, String propertyValue);
+
+    void property(Map<String, String> properties);
 
     void android(@DelegatesTo(value = AndroidIntegrator.class,
             strategy = Closure.DELEGATE_FIRST) Closure androidConfigure);

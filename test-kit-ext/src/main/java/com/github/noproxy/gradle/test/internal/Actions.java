@@ -61,6 +61,11 @@ public class Actions {
         };
     }
 
+    public static Action<File> mkdirs() {
+        //noinspection ResultOfMethodCallIgnored
+        return File::mkdirs;
+    }
+
     public static Action<Closeable> close() {
         return closeable -> {
             try {

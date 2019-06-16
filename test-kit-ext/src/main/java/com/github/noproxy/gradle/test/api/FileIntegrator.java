@@ -17,23 +17,58 @@
 package com.github.noproxy.gradle.test.api;
 
 
+import org.gradle.api.Action;
+import org.gradle.api.NonNullApi;
+
 import java.io.Closeable;
 import java.io.File;
 
+import groovy.lang.Closure;
+import groovy.lang.DelegatesTo;
+
+@NonNullApi
 public interface FileIntegrator extends Closeable {
     File file(String path);
 
+    File file(String path, Action<File> fileAction);
+
+    File file(String path, @DelegatesTo(File.class) Closure closure);
+
     File newDir(String path);
+
+    File newDir(String path, Action<File> fileAction);
+
+    File newDir(String path, @DelegatesTo(File.class) Closure closure);
 
     File newDir(File file);
 
+    File newDir(File file, Action<File> fileAction);
+
+    File newDir(File file, @DelegatesTo(File.class) Closure closure);
+
     File newFile(String path);
 
+    File newFile(String path, Action<File> fileAction);
+
+    File newFile(String path, @DelegatesTo(File.class) Closure closure);
+
     File newFile(File file);
+
+    File newFile(File file, Action<File> fileAction);
+
+    File newFile(File file, @DelegatesTo(File.class) Closure closure);
 
     File getRoot();
 
     FileIntegrator child(String path);
 
+    FileIntegrator child(String path, Action<FileIntegrator> fileAction);
+
+    FileIntegrator child(String path, @DelegatesTo(FileIntegrator.class) Closure closure);
+
     FileIntegrator child(File file);
+
+    FileIntegrator child(File file, Action<FileIntegrator> fileAction);
+
+    FileIntegrator child(File file, @DelegatesTo(FileIntegrator.class) Closure closure);
 }
