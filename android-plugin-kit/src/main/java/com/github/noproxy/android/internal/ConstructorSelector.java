@@ -14,15 +14,10 @@
  *    limitations under the License.
  */
 
+package com.github.noproxy.android.internal;
 
-include("test-kit-annotations")
-include("test-kit-ext")
-include("android-plugin-kit")
+import java.lang.reflect.Constructor;
 
-val plugins = listOf("tinker-maven-publish", "android-plugin-kit-plugin")
-for (name in plugins) {
-    include(name)
-    project(":$name").projectDir = file("plugins/$name")
+public interface ConstructorSelector {
+    <T> Constructor<T> selectConstructor(Class<T> type);
 }
-
-rootProject.name = "gradle-plugin-kit"

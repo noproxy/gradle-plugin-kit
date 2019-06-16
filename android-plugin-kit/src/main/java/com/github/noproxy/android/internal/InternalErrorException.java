@@ -14,15 +14,22 @@
  *    limitations under the License.
  */
 
+package com.github.noproxy.android.internal;
 
-include("test-kit-annotations")
-include("test-kit-ext")
-include("android-plugin-kit")
+import org.gradle.api.GradleException;
 
-val plugins = listOf("tinker-maven-publish", "android-plugin-kit-plugin")
-for (name in plugins) {
-    include(name)
-    project(":$name").projectDir = file("plugins/$name")
+/**
+ * A <code>InvalidUsageException</code> is thrown, if there is some internal error, please report issue to us.
+ */
+public class InternalErrorException extends GradleException {
+    public InternalErrorException() {
+    }
+
+    public InternalErrorException(String message) {
+        super(message);
+    }
+
+    public InternalErrorException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
-
-rootProject.name = "gradle-plugin-kit"

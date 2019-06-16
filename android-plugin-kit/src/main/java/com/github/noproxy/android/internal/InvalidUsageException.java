@@ -14,15 +14,24 @@
  *    limitations under the License.
  */
 
+package com.github.noproxy.android.internal;
 
-include("test-kit-annotations")
-include("test-kit-ext")
-include("android-plugin-kit")
+import org.gradle.api.GradleException;
+import org.gradle.internal.exceptions.Contextual;
 
-val plugins = listOf("tinker-maven-publish", "android-plugin-kit-plugin")
-for (name in plugins) {
-    include(name)
-    project(":$name").projectDir = file("plugins/$name")
+/**
+ * A <code>InvalidUsageException</code> is thrown, if the plugin is making wrong use of the api.
+ */
+@Contextual
+public class InvalidUsageException extends GradleException {
+    public InvalidUsageException() {
+    }
+
+    public InvalidUsageException(String message) {
+        super(message);
+    }
+
+    public InvalidUsageException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
-
-rootProject.name = "gradle-plugin-kit"

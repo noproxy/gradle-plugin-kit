@@ -14,15 +14,21 @@
  *    limitations under the License.
  */
 
+package com.github.noproxy.android.internal.api;
 
-include("test-kit-annotations")
-include("test-kit-ext")
-include("android-plugin-kit")
+import com.github.noproxy.android.api.AnnotationAwareCaller;
 
-val plugins = listOf("tinker-maven-publish", "android-plugin-kit-plugin")
-for (name in plugins) {
-    include(name)
-    project(":$name").projectDir = file("plugins/$name")
+import org.gradle.api.NonNullApi;
+import org.jetbrains.annotations.Nullable;
+
+import java.lang.reflect.Method;
+
+@NonNullApi
+public interface AnnotationAwareCallerInternal extends AnnotationAwareCaller {
+    void call(Object hasActions);
+
+    <T> T create(Class<T> clazzHasActions);
+
+    @Nullable
+    Object mayCall(Method method, Object hasActions);
 }
-
-rootProject.name = "gradle-plugin-kit"

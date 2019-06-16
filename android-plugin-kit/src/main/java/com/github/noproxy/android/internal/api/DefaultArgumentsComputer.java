@@ -14,15 +14,18 @@
  *    limitations under the License.
  */
 
+package com.github.noproxy.android.internal.api;
 
-include("test-kit-annotations")
-include("test-kit-ext")
-include("android-plugin-kit")
+import java.lang.reflect.Executable;
 
-val plugins = listOf("tinker-maven-publish", "android-plugin-kit-plugin")
-for (name in plugins) {
-    include(name)
-    project(":$name").projectDir = file("plugins/$name")
+public class DefaultArgumentsComputer implements ArgumentsComputer {
+    @Override
+    public Object[] argumentsFor(Executable constructor) {
+        return new Object[0];
+    }
+
+    @Override
+    public Object[] argumentsFor(Executable constructor, Object... providedArguments) {
+        return new Object[0];
+    }
 }
-
-rootProject.name = "gradle-plugin-kit"

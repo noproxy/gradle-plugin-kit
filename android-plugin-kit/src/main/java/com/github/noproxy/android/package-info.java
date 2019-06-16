@@ -14,15 +14,4 @@
  *    limitations under the License.
  */
 
-
-include("test-kit-annotations")
-include("test-kit-ext")
-include("android-plugin-kit")
-
-val plugins = listOf("tinker-maven-publish", "android-plugin-kit-plugin")
-for (name in plugins) {
-    include(name)
-    project(":$name").projectDir = file("plugins/$name")
-}
-
-rootProject.name = "gradle-plugin-kit"
+package com.github.noproxy.android;

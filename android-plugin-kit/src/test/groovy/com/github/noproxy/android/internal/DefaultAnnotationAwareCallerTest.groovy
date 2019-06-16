@@ -14,15 +14,9 @@
  *    limitations under the License.
  */
 
+package com.github.noproxy.android.internal
 
-include("test-kit-annotations")
-include("test-kit-ext")
-include("android-plugin-kit")
+import spock.lang.Specification
 
-val plugins = listOf("tinker-maven-publish", "android-plugin-kit-plugin")
-for (name in plugins) {
-    include(name)
-    project(":$name").projectDir = file("plugins/$name")
+class DefaultAnnotationAwareCallerTest extends Specification {
 }
-
-rootProject.name = "gradle-plugin-kit"

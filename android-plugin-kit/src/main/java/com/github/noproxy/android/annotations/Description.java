@@ -14,15 +14,17 @@
  *    limitations under the License.
  */
 
+package com.github.noproxy.android.annotations;
 
-include("test-kit-annotations")
-include("test-kit-ext")
-include("android-plugin-kit")
+import org.jetbrains.annotations.NotNull;
 
-val plugins = listOf("tinker-maven-publish", "android-plugin-kit-plugin")
-for (name in plugins) {
-    include(name)
-    project(":$name").projectDir = file("plugins/$name")
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE})
+public @interface Description {
+    @NotNull String value();
 }
-
-rootProject.name = "gradle-plugin-kit"

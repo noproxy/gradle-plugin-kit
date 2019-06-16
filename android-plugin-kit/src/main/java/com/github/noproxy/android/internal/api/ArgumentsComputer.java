@@ -14,11 +14,14 @@
  *    limitations under the License.
  */
 
-package com.github.noproxy.android.plugin.internal;
+package com.github.noproxy.android.internal.api;
 
-public class DiscoveringAndroidSdiProvider implements AndroidSdkProvider {
-    @Override
-    public String getSdkHome() {
-        return null;
-    }
+import java.lang.reflect.Executable;
+
+public interface ArgumentsComputer {
+    Object NULL = new Object();
+
+    Object[] argumentsFor(Executable constructor);
+
+    Object[] argumentsFor(Executable constructor, Object... providedArguments);
 }

@@ -14,8 +14,27 @@
  *    limitations under the License.
  */
 
-package com.github.noproxy.gradle.test.api.extension;
+package com.github.noproxy.android.internal
 
-public class SpecificationMethods {
+import com.github.noproxy.gradle.test.api.template.IntegrateSpecification
 
+class RunWhenAndroidAppliedSpec extends IntegrateSpecification {
+
+    def setup() {
+        quiet()
+    }
+
+    def "ClassNotFound when android plugin not in classpath"() {
+        buildFile """
+plugins {
+    id 'com.github.noproxy.android-plugin-kit-plugin'
+}
+"""
+
+        when:
+        configure()
+
+        then:
+        output.contains("class AndroidBasePlugin not found, the classpath may not contains android plugin.")
+    }
 }

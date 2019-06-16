@@ -14,15 +14,8 @@
  *    limitations under the License.
  */
 
+package com.github.noproxy.android.api;
 
-include("test-kit-annotations")
-include("test-kit-ext")
-include("android-plugin-kit")
-
-val plugins = listOf("tinker-maven-publish", "android-plugin-kit-plugin")
-for (name in plugins) {
-    include(name)
-    project(":$name").projectDir = file("plugins/$name")
+public interface AnnotationAwareCaller {
+    <T> T createAndCall(Class<T> clazzHasActions);
 }
-
-rootProject.name = "gradle-plugin-kit"

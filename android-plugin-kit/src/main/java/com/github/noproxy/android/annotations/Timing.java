@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019 the original author or authors.
+ *    Copyright 2018 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,15 +14,9 @@
  *    limitations under the License.
  */
 
+package com.github.noproxy.android.annotations;
 
-include("test-kit-annotations")
-include("test-kit-ext")
-include("android-plugin-kit")
-
-val plugins = listOf("tinker-maven-publish", "android-plugin-kit-plugin")
-for (name in plugins) {
-    include(name)
-    project(":$name").projectDir = file("plugins/$name")
+public enum Timing {
+    BeforeAndroid,
+    AfterAndroid
 }
-
-rootProject.name = "gradle-plugin-kit"
