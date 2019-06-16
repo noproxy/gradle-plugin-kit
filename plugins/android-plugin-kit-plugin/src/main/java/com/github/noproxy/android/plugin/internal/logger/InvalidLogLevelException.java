@@ -14,8 +14,16 @@
  *    limitations under the License.
  */
 
-package com.github.noproxy.android.plugin.internal;
+package com.github.noproxy.android.plugin.internal.logger;
 
-public interface AndroidSdkProvider {
-    String getSdkHome();
+import com.github.noproxy.android.plugin.internal.InvalidUsageException;
+
+import org.gradle.api.logging.LogLevel;
+
+import java.util.Arrays;
+
+public class InvalidLogLevelException extends InvalidUsageException {
+    InvalidLogLevelException(String parsedValue) {
+        super("fail to parse LogLevel from " + parsedValue + ". It must be one of " + Arrays.toString(LogLevel.values()));
+    }
 }

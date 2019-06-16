@@ -16,56 +16,17 @@
 
 package com.github.noproxy.android.plugin;
 
-import com.github.noproxy.android.plugin.internal.AndroidPluginKitExtensionInternal;
-import com.github.noproxy.android.plugin.internal.AndroidSdkProvider;
-import com.github.noproxy.android.plugin.internal.AndroidSdkProviderFactory;
-import com.github.noproxy.android.plugin.internal.DefaultAndroidPluginKitExtension;
+import com.github.noproxy.android.plugin.internal.AndroidPluginKitPluginImpl;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.tasks.testing.Test;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("unused")
 public class AndroidPluginKitPlugin implements Plugin<Project> {
     @Override
     public void apply(@NotNull Project project) {
-        final AndroidPluginKitExtensionInternal extension = (AndroidPluginKitExtensionInternal) project.getExtensions().
-                create(AndroidPluginKitExtension.class, "androidPluginKit", DefaultAndroidPluginKitExtension.class);
-
-        configureAndroidSdkForTests(project, extension);
-    }
-
-    /**
-     * android plugin find sdk in this order:
-     * 1. sdk.dir in local.properties
-     * 2. android.dir in local.properties
-     * 3. ANDROID_SDK_ROOT by System.getenv
-     * 4. ANDROID_HOME by System.getenv
-     * 5. android.home by System.getProperty
-     */
-    private void configureAndroidSdkForTests(Project project, AndroidPluginKitExtensionInternal extension) {
-        final AndroidSdkProvider sdkProvider = new AndroidSdkProviderFactory(extension).createSdkProvider();
-        final Class<? extends Plugin> androidBasePluginClass = getAndroidBasePluginClass();
-        if (androidBasePluginClass != null) {
-            project.getPlugins().withType(androidBasePluginClass, androidBasePlugin -> {
-                project.getTasks().withType(Test.class).all(test -> {
-                    final String sdkHome = sdkProvider.getSdkHome();
-                    test.systemProperty("android.home", sdkHome);
-                });
-            });
-        }
-    }
-
-    @Nullable
-    private Class<? extends Plugin> getAndroidBasePluginClass() {
-        try {
-            //noinspection unchecked
-            return (Class<? extends Plugin>) Class.forName("com.android.build.gradle.api.AndroidBasePlugin",
-                    false, this.getClass().getClassLoader());
-        } catch (ClassNotFoundException e) {
-            return null;
-        }
+        final AndroidPluginKitPluginImpl delegate = new AndroidPluginKitPluginImpl(project);
+        delegate.configureAndroidSdkForTests();
     }
 }

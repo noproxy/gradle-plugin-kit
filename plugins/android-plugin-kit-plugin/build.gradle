@@ -24,8 +24,6 @@ dependencies {
     implementation(gradleApi())
     implementation("org.jetbrains:annotations:13.0")
     implementation("org.apache.commons:commons-lang3:3.9")
-
-    testImplementation(project(":test-kit-ext"))
 }
 
 repositories {
@@ -36,11 +34,6 @@ dependencies {
     compileOnly("com.android.tools.build:gradle:3.3.2")
 }
 
-tasks.withType(Test) {
-    doFirst {
-        file("build/tmp/testfiles").deleteDir()
-    }
-}
 // publishing
 assert ("com.github.noproxy" == group)
 assert ("android-plugin-kit-plugin" == name)
@@ -54,7 +47,7 @@ githubRelease {
 
 gradlePlugin {
     plugins {
-        create("androidPluginKitPlugin") {
+        androidPluginKitPlugin {
             id = "${group}.${project.name}"
             implementationClass = "com.github.noproxy.android.plugin.AndroidPluginKitPlugin"
         }
@@ -73,3 +66,5 @@ pluginBundle {
         }
     }
 }
+
+apply from: rootProject.file('gradle/test_plugin.gradle')

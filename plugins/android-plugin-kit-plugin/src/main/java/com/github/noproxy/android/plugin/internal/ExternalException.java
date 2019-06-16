@@ -16,24 +16,19 @@
 
 package com.github.noproxy.android.plugin.internal;
 
-import org.jetbrains.annotations.NotNull;
+import org.gradle.api.GradleException;
 
-import java.io.File;
+import javax.annotation.Nullable;
 
-public class AndroidSdkProviderFactory {
-    private final AndroidPluginKitExtensionInternal extension;
-
-    public AndroidSdkProviderFactory(@NotNull AndroidPluginKitExtensionInternal extension) {
-        this.extension = extension;
+public class ExternalException extends GradleException {
+    public ExternalException() {
     }
 
+    public ExternalException(String message) {
+        super(message);
+    }
 
-    public AndroidSdkProvider createSdkProvider() {
-        final File userProvidedHome = extension.getTestAndroidSdk();
-        if (userProvidedHome == null) {
-            return new DiscoveringAndroidSdiProvider();
-        } else {
-            return new FixedAndroidSdkProvider(userProvidedHome);
-        }
+    public ExternalException(String message, @Nullable Throwable cause) {
+        super(message, cause);
     }
 }

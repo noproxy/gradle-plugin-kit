@@ -14,19 +14,8 @@
  *    limitations under the License.
  */
 
-package com.github.noproxy.android.plugin.internal;
+package com.github.noproxy.android.plugin.internal.sdk;
 
-import java.io.File;
-
-public class FixedAndroidSdkProvider implements AndroidSdkProvider {
-    private final File androidHome;
-
-    public FixedAndroidSdkProvider(File androidHome) {
-        this.androidHome = androidHome;
-    }
-
-    @Override
-    public String getSdkHome() {
-        return androidHome.getAbsolutePath();
-    }
+public interface AndroidSdkProvider {
+    String getSdkHome();
 }

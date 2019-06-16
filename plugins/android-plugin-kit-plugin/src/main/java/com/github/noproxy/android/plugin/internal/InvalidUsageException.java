@@ -16,29 +16,21 @@
 
 package com.github.noproxy.android.plugin.internal;
 
-import com.github.noproxy.android.plugin.AndroidPluginKitExtension;
+import org.gradle.api.InvalidUserDataException;
+import org.gradle.internal.exceptions.Contextual;
 
-import org.gradle.api.Project;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 
-import java.io.File;
-
-class DefaultAndroidPluginKitExtension implements AndroidPluginKitExtension, AndroidPluginKitExtensionInternal {
-    private final Project project;
-    private File androidSdk;
-
-    public DefaultAndroidPluginKitExtension(Project project) {
-        this.project = project;
+@Contextual
+public class InvalidUsageException extends InvalidUserDataException {
+    public InvalidUsageException() {
     }
 
-    @Nullable
-    @Override
-    public File getTestAndroidSdk() {
-        return androidSdk;
+    public InvalidUsageException(String message) {
+        super(message);
     }
 
-    @Override
-    public void setTestAndroidSdk(Object object) {
-        androidSdk = project.file(object);
+    public InvalidUsageException(String message, @Nullable Throwable cause) {
+        super(message, cause);
     }
 }

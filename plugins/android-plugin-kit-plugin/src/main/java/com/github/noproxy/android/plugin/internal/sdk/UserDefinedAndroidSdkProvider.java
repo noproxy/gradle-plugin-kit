@@ -14,31 +14,19 @@
  *    limitations under the License.
  */
 
-package com.github.noproxy.android.plugin.internal;
-
-import com.github.noproxy.android.plugin.AndroidPluginKitExtension;
-
-import org.gradle.api.Project;
-import org.jetbrains.annotations.Nullable;
+package com.github.noproxy.android.plugin.internal.sdk;
 
 import java.io.File;
 
-class DefaultAndroidPluginKitExtension implements AndroidPluginKitExtension, AndroidPluginKitExtensionInternal {
-    private final Project project;
-    private File androidSdk;
+class UserDefinedAndroidSdkProvider implements AndroidSdkProvider {
+    private final File androidHome;
 
-    public DefaultAndroidPluginKitExtension(Project project) {
-        this.project = project;
-    }
-
-    @Nullable
-    @Override
-    public File getTestAndroidSdk() {
-        return androidSdk;
+    UserDefinedAndroidSdkProvider(File androidHome) {
+        this.androidHome = androidHome;
     }
 
     @Override
-    public void setTestAndroidSdk(Object object) {
-        androidSdk = project.file(object);
+    public String getSdkHome() {
+        return androidHome.getAbsolutePath();
     }
 }
