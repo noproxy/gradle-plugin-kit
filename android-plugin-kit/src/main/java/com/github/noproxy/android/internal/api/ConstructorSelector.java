@@ -16,16 +16,8 @@
 
 package com.github.noproxy.android.internal.api;
 
-import java.lang.reflect.Executable;
+import java.lang.reflect.Constructor;
 
-public class DefaultArgumentsComputer implements ArgumentsComputer {
-    @Override
-    public Object[] argumentsFor(Executable constructor) {
-        return new Object[0];
-    }
-
-    @Override
-    public Object[] argumentsFor(Executable constructor, Object... providedArguments) {
-        return new Object[0];
-    }
+public interface ConstructorSelector {
+    <T> Constructor<T> selectConstructor(Class<T> type);
 }

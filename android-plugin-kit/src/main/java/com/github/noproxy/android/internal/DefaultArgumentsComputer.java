@@ -16,8 +16,25 @@
 
 package com.github.noproxy.android.internal;
 
-import java.lang.reflect.Constructor;
+import com.github.noproxy.android.internal.api.ArgumentsComputer;
+import com.google.inject.Injector;
 
-public interface ConstructorSelector {
-    <T> Constructor<T> selectConstructor(Class<T> type);
+import java.lang.reflect.Executable;
+
+public class DefaultArgumentsComputer implements ArgumentsComputer {
+    private final Injector injector;
+
+    public DefaultArgumentsComputer(Injector injector) {
+        this.injector = injector;
+    }
+
+    @Override
+    public Object[] argumentsFor(Executable constructorOrMethod) {
+        return new Object[0];
+    }
+
+    @Override
+    public Object[] argumentsFor(Executable constructorOrMethod, Object... providedArguments) {
+        return new Object[0];
+    }
 }

@@ -18,7 +18,8 @@ package com.github.noproxy.android.internal;
 
 import com.github.noproxy.android.internal.api.AnnotationAwareCallerInternal;
 import com.github.noproxy.android.internal.api.ArgumentsComputer;
-import com.github.noproxy.android.internal.api.DefaultArgumentsComputer;
+import com.github.noproxy.android.internal.api.ConstructorSelector;
+import com.google.inject.Injector;
 
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.NonNullApi;
@@ -31,7 +32,11 @@ import java.lang.reflect.Method;
 @NonNullApi
 public class DefaultAnnotationAwareCaller implements AnnotationAwareCallerInternal {
     private final ConstructorSelector constructorSelector = new DefaultConstructorSelector();
-    private final ArgumentsComputer argumentsComputer = new DefaultArgumentsComputer();
+    private final ArgumentsComputer argumentsComputer;
+
+    public DefaultAnnotationAwareCaller(Injector injector) {
+        argumentsComputer = new DefaultArgumentsComputer(injector);
+    }
 
     @Override
     public void call(Object hasActions) {

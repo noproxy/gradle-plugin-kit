@@ -21,7 +21,7 @@ import java.lang.reflect.Executable;
 public interface ArgumentsComputer {
     Object NULL = new Object();
 
-    Object[] argumentsFor(Executable constructor);
+    Object[] argumentsFor(Executable constructorOrMethod);
 
-    Object[] argumentsFor(Executable constructor, Object... providedArguments);
+    Object[] argumentsFor(Executable constructorOrMethod, Object... providedArguments);
 }

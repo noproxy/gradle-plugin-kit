@@ -16,6 +16,8 @@
 
 package com.github.noproxy.android.internal;
 
+import com.github.noproxy.android.internal.api.ConstructorSelector;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
