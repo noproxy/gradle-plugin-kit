@@ -1,40 +1,23 @@
 /*
- *    Copyright 2019 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.github.noproxy.gradle.test.processor;
 
 
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ArrayTypeName;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
-import com.squareup.javapoet.TypeVariableName;
-import com.squareup.javapoet.WildcardTypeName;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedArrayType;
-import java.lang.reflect.AnnotatedType;
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import com.squareup.javapoet.*;
 
 import javax.lang.model.AnnotatedConstruct;
 import javax.lang.model.element.AnnotationMirror;
@@ -42,6 +25,12 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedArrayType;
+import java.lang.reflect.AnnotatedType;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 
@@ -136,6 +125,7 @@ public interface Poetry {
             TypeName component = ((ArrayTypeName) type).componentType;
             builder.append('[');
             if (component.isPrimitive()) {
+                //CHECKSTYLE:OFF
                 // @formatter:off
                 if (component.equals(TypeName.BOOLEAN)) return builder.append('Z');
                 if (component.equals(TypeName.BYTE)) return builder.append('B');
@@ -146,6 +136,7 @@ public interface Poetry {
                 if (component.equals(TypeName.LONG)) return builder.append('J');
                 if (component.equals(TypeName.SHORT)) return builder.append('S');
                 // @formatter:on
+                //CHECKSTYLE:ON
                 throw new AssertionError(component + " is primitive and not handled?!");
             }
             builder.append(binary(component));
@@ -182,14 +173,16 @@ public interface Poetry {
      * @return method call statement
      */
     static String call(MethodSpec method, Function<ParameterSpec, String> parameterName) {
-        if (method.parameters.isEmpty())
+        if (method.parameters.isEmpty()) {
             return method.name + "()";
+        }
         StringBuilder builder = new StringBuilder();
         builder.append(method.name);
         builder.append('(');
         for (ParameterSpec parameter : method.parameters) {
-            if (builder.length() > method.name.length() + 1)
+            if (builder.length() > method.name.length() + 1) {
                 builder.append(", ");
+            }
             builder.append(parameterName.apply(parameter));
         }
         builder.append(')');
@@ -220,8 +213,9 @@ public interface Poetry {
      * @return the method builder overriding the other method
      */
     static MethodSpec.Builder override(MethodSpec method, Function<MethodSpec, CodeBlock> coder) {
-        if (method.isConstructor())
+        if (method.isConstructor()) {
             throw new IllegalArgumentException("constructor not supported");
+        }
         MethodSpec.Builder builder = MethodSpec.methodBuilder(method.name)
                 .addJavadoc(method.javadoc.toString())
                 .addAnnotations(method.annotations)

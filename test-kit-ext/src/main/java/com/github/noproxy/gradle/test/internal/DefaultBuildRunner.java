@@ -1,24 +1,23 @@
 /*
- *    Copyright 2019 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.github.noproxy.gradle.test.internal;
 
 import com.github.noproxy.gradle.test.api.BuildRunner;
 import com.github.noproxy.gradle.test.api.FileIntegrator;
-
 import org.gradle.internal.impldep.com.google.common.collect.Lists;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.UnexpectedBuildFailure;
@@ -35,18 +34,8 @@ public class DefaultBuildRunner implements BuildRunner {
     private final FileIntegrator integrator;
     private String output;
     private BuildResult result;
-    private Throwable throwable = null;
+    private Throwable throwable;
     private boolean enableStackTrace = true;
-
-    @Override
-    public void buildArgument(String... additionArguments) {
-        Collections.addAll(appendArguments, additionArguments);
-    }
-
-    @Override
-    public void quiet() {
-        buildArgument("--quiet");
-    }
 
     @ParamertersWillBeClosed
     public DefaultBuildRunner(FileIntegrator integrator) {
@@ -64,6 +53,16 @@ public class DefaultBuildRunner implements BuildRunner {
         strings[0] = first;
         System.arraycopy(others, 0, strings, 1, others.length);
         return strings;
+    }
+
+    @Override
+    public void buildArgument(String... additionArguments) {
+        Collections.addAll(appendArguments, additionArguments);
+    }
+
+    @Override
+    public void quiet() {
+        buildArgument("--quiet");
     }
 
     @Closer
