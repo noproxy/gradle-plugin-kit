@@ -281,3 +281,4 @@ $RECYCLE.BIN/
 
 # External Project
 /plugins/tinker-maven-publish
+/.idea/checkstyle-idea.xml
