@@ -38,4 +38,6 @@ allprojects {
     dependencies {
         components.all(HamcrestCapability)
     }
+
+    apply from: rootProject.file('gradle/checkstyle.gradle')
 }
