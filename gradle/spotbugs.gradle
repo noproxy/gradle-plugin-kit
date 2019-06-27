@@ -14,15 +14,26 @@
  * limitations under the License.
  */
 
-plugins {
-    id 'java'
-}
+import com.github.spotbugs.SpotBugsTask
 
-repositories {
-    maven { url "https://plugins.gradle.org/m2/" }
+/* in root build.gradle file
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "gradle.plugin.com.github.spotbugs:spotbugs-gradle-plugin:2.0.0"
+  }
 }
+ */
 
-dependencies {
-    implementation "gradle.plugin.com.github.breadmoirai:github-release:2.2.9"
-    implementation "gradle.plugin.com.github.spotbugs:spotbugs-gradle-plugin:2.0.0"
+apply plugin: "com.github.spotbugs"
+
+tasks.withType(SpotBugsTask) {
+    reports {
+        xml.enabled false
+        html.enabled true
+    }
 }

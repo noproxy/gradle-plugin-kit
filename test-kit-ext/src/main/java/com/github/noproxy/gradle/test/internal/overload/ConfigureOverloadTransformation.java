@@ -22,10 +22,8 @@ import org.codehaus.groovy.ast.expr.ArrayExpression;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
-import org.codehaus.groovy.ast.tools.GeneralUtils;
 import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
-import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.codehaus.groovy.transform.ASTTransformation;
 import org.codehaus.groovy.transform.GroovyASTTransformation;
 import org.gradle.api.Action;
@@ -38,7 +36,6 @@ import java.util.stream.Collectors;
 
 import static org.codehaus.groovy.ast.ClassHelper.OBJECT_TYPE;
 import static org.codehaus.groovy.ast.tools.GeneralUtils.*;
-import static org.codehaus.groovy.runtime.DefaultGroovyMethods.dropRight;
 
 @GroovyASTTransformation(phase = CompilePhase.SEMANTIC_ANALYSIS)
 public class ConfigureOverloadTransformation implements ASTTransformation {
@@ -46,6 +43,10 @@ public class ConfigureOverloadTransformation implements ASTTransformation {
     private static final ClassNode CLASS_ACTION = ClassHelper.make(Action.class);
     private static final ClassNode CLASS_CLOSURE = ClassHelper.make(Closure.class);
     private static final boolean DEBUG = true;
+
+    private static List<ClassNode> getParameterTypes(MethodNode methodNode) {
+        return Arrays.stream(methodNode.getParameters()).map(Parameter::getType).collect(Collectors.toList());
+    }
 
     private void log(String format, Object... args) {
         if (DEBUG) {
@@ -98,10 +99,6 @@ public class ConfigureOverloadTransformation implements ASTTransformation {
                 && methodToCheck.getReturnType().equals(configurerMethod.getReturnType());
 //        log("check whether %s overload %s: %b", betterName(configurerMethod), betterName(methodToCheck), answer);
         return answer;
-    }
-
-    private static List<ClassNode> getParameterTypes(MethodNode methodNode) {
-        return Arrays.stream(methodNode.getParameters()).map(Parameter::getType).collect(Collectors.toList());
     }
 
     private void handleField(ClassNode specification, FieldNode field) {

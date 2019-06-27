@@ -16,21 +16,25 @@
 
 package com.github.noproxy.android.internal;
 
+import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.logging.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public class RunWhenAndroidApplied {
-    private Project project;
-    private Logger logger;
+    private final Project project;
+    private final Logger logger;
 
-    public void checkAndroidPlugin() {
+    public RunWhenAndroidApplied(Project project, Logger logger) {
+        this.project = project;
+        this.logger = logger;
+    }
+
+    public void runWhenAndroidPluginApplied(Action<? super Plugin> action) {
         final Class<? extends Plugin> androidBasePluginClass = getAndroidBasePluginClass();
         if (androidBasePluginClass != null) {
-            project.getPlugins().withType(androidBasePluginClass, androidBasePlugin -> {
-
-            });
+            project.getPlugins().withType(androidBasePluginClass, action);
         }
     }
 

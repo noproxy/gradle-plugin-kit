@@ -23,7 +23,6 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath("gradle.plugin.com.github.breadmoirai:github-release:2.2.9")
         classpath("com.github.noproxy:android-plugin-kit-plugin:0.0.1")
     }
 }
@@ -40,4 +39,5 @@ allprojects {
     }
 
     apply from: rootProject.file('gradle/checkstyle.gradle')
+    apply from: rootProject.file('gradle/spotbugs.gradle')
 }
