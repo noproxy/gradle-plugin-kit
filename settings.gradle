@@ -17,12 +17,20 @@
 
 include("test-kit-annotations")
 include("test-kit-ext")
+include("test-kit-ext-integ")
 include("android-plugin-kit")
+include("init-scripts")
 
-val plugins = listOf("tinker-maven-publish", "android-plugin-kit-plugin")
-for (name in plugins) {
-    include(name)
-    project(":$name").projectDir = file("plugins/$name")
+project(":init-scripts").buildFileName = "init-scripts.gradle"
+
+file('subprojects').eachDir { subproject ->
+    include subproject.name
+    project(":${subproject.name}").projectDir = subproject
+    project(":${subproject.name}").buildFileName = "${subproject.name}.gradle"
+}
+file('plugins').eachDir { plugin ->
+    include plugin.name
+    project(":${plugin.name}").projectDir = plugin
 }
 
 rootProject.name = "gradle-plugin-kit"

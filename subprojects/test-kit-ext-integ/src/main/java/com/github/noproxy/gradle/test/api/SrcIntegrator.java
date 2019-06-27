@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package com.github.noproxy.android.plugin.internal;
+package com.github.noproxy.gradle.test.api;
 
-import org.gradle.api.GradleException;
-
+import org.gradle.api.NonNullApi;
 import org.jetbrains.annotations.Nullable;
 
-public class ExternalException extends GradleException {
-    public ExternalException() {
-    }
+import java.io.File;
 
-    public ExternalException(String message) {
-        super(message);
-    }
+@NonNullApi
+public interface SrcIntegrator {
+    File java(String sourceSet, @Nullable String pathOrPackageName, String simpleClassName);
 
-    public ExternalException(String message, @Nullable Throwable cause) {
-        super(message, cause);
-    }
+    File java(@Nullable String pathOrPackageName, String simpleClassName);
+
+    File java(String className);
 }

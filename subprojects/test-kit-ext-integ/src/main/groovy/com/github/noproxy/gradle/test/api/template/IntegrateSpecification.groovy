@@ -19,6 +19,7 @@ package com.github.noproxy.gradle.test.api.template
 import com.github.noproxy.gradle.test.api.BuildRunner
 import com.github.noproxy.gradle.test.api.FileIntegrator
 import com.github.noproxy.gradle.test.api.ProjectIntegrator
+import com.github.noproxy.gradle.test.api.TaskReview
 import com.github.noproxy.gradle.test.internal.*
 import org.junit.Rule
 import spock.lang.Specification
@@ -37,4 +38,7 @@ class IntegrateSpecification extends Specification {
     @Closer
     @Delegate(parameterAnnotations = true)
     private BuildRunner runner = new DefaultBuildRunner(integrator)
+
+    @Delegate(parameterAnnotations = true)
+    private TaskReview taskReview = new OutputTaskReview(runner)
 }

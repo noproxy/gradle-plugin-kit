@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package com.github.noproxy.android.plugin.internal;
+plugins {
+    id 'groovy'
+}
 
-import org.gradle.api.GradleException;
+apply from: rootProject.file('gradle/test_plugin.gradle')
 
-import org.jetbrains.annotations.Nullable;
+dependencies {
+    integrationTestImplementation localGroovy()
+    implementation("org.jetbrains:annotations:13.0")
+}
 
-public class ExternalException extends GradleException {
-    public ExternalException() {
-    }
-
-    public ExternalException(String message) {
-        super(message);
-    }
-
-    public ExternalException(String message, @Nullable Throwable cause) {
-        super(message, cause);
-    }
+tasks.withType(Test) {
+    // Used by init script integrating test. See also:
+    // init-scripts/src/test/groovy/com/noproxy/github/init/InitScriptIntegrateSpecification.groovy
+    systemProperty('noproxy.script.home', file('src/main/groovy').absolutePath);
 }

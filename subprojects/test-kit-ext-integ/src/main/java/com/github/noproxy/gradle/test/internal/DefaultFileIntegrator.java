@@ -18,9 +18,9 @@ package com.github.noproxy.gradle.test.internal;
 
 import com.github.noproxy.gradle.test.api.FileIntegrator;
 
+import com.google.common.collect.Sets;
 import org.gradle.api.Action;
 import org.gradle.api.NonNullApi;
-import org.gradle.internal.impldep.org.testng.collections.Sets;
 
 import java.io.Closeable;
 import java.io.File;

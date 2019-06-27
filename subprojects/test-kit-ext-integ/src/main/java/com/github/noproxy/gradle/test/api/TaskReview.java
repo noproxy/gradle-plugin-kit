@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.noproxy.android.plugin.internal;
+package com.github.noproxy.gradle.test.api;
 
-import org.gradle.api.GradleException;
+public interface TaskReview {
+    boolean taskUpToDate(String task);
 
-import org.jetbrains.annotations.Nullable;
+    boolean taskFromCached(String task);
 
-public class ExternalException extends GradleException {
-    public ExternalException() {
-    }
+    boolean taskNoSource(String task);
 
-    public ExternalException(String message) {
-        super(message);
-    }
+    boolean taskRun(String task);
 
-    public ExternalException(String message, @Nullable Throwable cause) {
-        super(message, cause);
-    }
+    boolean taskNotExecuted(String task);
+
+    /**
+     * @return true when one of {@link #taskFromCached(String)},
+     * {@link #taskNoSource(String)}, {@link #taskUpToDate(String)} is true.
+     */
+    boolean taskSkipped(String task);
 }

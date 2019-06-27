@@ -18,7 +18,6 @@ package com.github.noproxy.gradle.test.internal;
 
 import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 import org.gradle.api.Action;
-import org.gradle.util.ClosureBackedAction;
 
 import java.io.Closeable;
 import java.io.File;

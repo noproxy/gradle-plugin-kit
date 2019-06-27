@@ -18,11 +18,19 @@ package com.github.noproxy.gradle.test.api;
 
 import com.github.noproxy.gradle.test.internal.Closer;
 
+import org.jetbrains.annotations.Nullable;
+
 @Closer
 public interface BuildRunner {
     void buildArgument(String... additionArguments);
 
     void quiet();
+
+    void setWithPluginClasspath(boolean withPluginClasspath);
+
+    void setGradleVersion(@Nullable String gradleVersion);
+
+    void forwardOutput(boolean forward);
 
     @Closer
     void run(String... tasksAndArguments);

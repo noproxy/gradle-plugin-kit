@@ -29,10 +29,10 @@ class UnitSpecification extends Specification {
     TestNameTestDirectoryProvider testDirectoryProvider = new TestNameTestDirectoryProvider()
     @Delegate(parameterAnnotations = true)
     private FileIntegrator integrator = new DefaultFileIntegrator(testDirectoryProvider.getTestDirectory())
-    @Delegate(parameterAnnotations = true)
-    private ProjectIntegrator project = new DefaultProjectIntegrator(integrator)
-    //TODO properties useless
-    @Closer
-    @Delegate(parameterAnnotations = true)
-    private ProjectRunner runner = new DefaultProjectRunner(integrator)
+//    @Delegate(parameterAnnotations = true)
+//    private ProjectIntegrator project = new DefaultProjectIntegrator(integrator)
+//    //TODO properties useless
+//    @Closer
+//    @Delegate(parameterAnnotations = true)
+//    private ProjectRunner runner = new DefaultProjectRunner(integrator)
 }

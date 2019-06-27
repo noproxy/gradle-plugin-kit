@@ -18,10 +18,11 @@ package com.github.noproxy.gradle.test.internal;
 
 import com.github.noproxy.gradle.test.api.BuildRunner;
 import com.github.noproxy.gradle.test.api.FileIntegrator;
-import org.gradle.internal.impldep.com.google.common.collect.Lists;
+import com.google.common.collect.Lists;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.UnexpectedBuildFailure;
 import org.gradle.testkit.runner.internal.DefaultGradleRunner;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 
 import java.util.ArrayList;
@@ -29,23 +30,23 @@ import java.util.Collections;
 import java.util.List;
 
 public class DefaultBuildRunner implements BuildRunner {
-    private final DefaultGradleRunner gradleRunner;
-    private final List<String> appendArguments = Lists.newArrayList();
     private final FileIntegrator integrator;
+
+    // runner parameters
+    private final List<String> appendArguments = Lists.newArrayList();
+    private boolean enableStackTrace = true;
+    private boolean withPluginClasspath = true;
+    private boolean forwardOutput = true;
+    private String gradleVersion;
+
+    // build status
     private String output;
     private BuildResult result;
     private Throwable throwable;
-    private boolean enableStackTrace = true;
 
     @ParamertersWillBeClosed
     public DefaultBuildRunner(FileIntegrator integrator) {
         this.integrator = integrator;
-        gradleRunner = new DefaultGradleRunner();
-        gradleRunner.withDebug(true)
-                .withPluginClasspath()
-//                .withGradleVersion("4.10.2")
-                .withProjectDir(integrator.getRoot())
-                .forwardOutput();
     }
 
     private static String[] plusArguments(String first, String... others) {
@@ -65,6 +66,21 @@ public class DefaultBuildRunner implements BuildRunner {
         buildArgument("--quiet");
     }
 
+    @Override
+    public void setWithPluginClasspath(boolean withPluginClasspath) {
+        this.withPluginClasspath = withPluginClasspath;
+    }
+
+    @Override
+    public void setGradleVersion(@Nullable String gradleVersion) {
+        this.gradleVersion = gradleVersion;
+    }
+
+    @Override
+    public void forwardOutput(boolean forward) {
+        this.forwardOutput = forward;
+    }
+
     @Closer
     @Override
     public void run(String... arguments) {
@@ -74,6 +90,19 @@ public class DefaultBuildRunner implements BuildRunner {
         output = null;
         result = null;
         throwable = null;
+
+        final DefaultGradleRunner gradleRunner = new DefaultGradleRunner();
+        gradleRunner.withDebug(true);
+        if (withPluginClasspath) {
+            gradleRunner.withPluginClasspath();
+        }
+        if (gradleVersion != null) {
+            gradleRunner.withGradleVersion(gradleVersion);
+        }
+        if (forwardOutput) {
+            gradleRunner.forwardOutput();
+        }
+        gradleRunner.withProjectDir(integrator.getRoot());
 
         final ArrayList<String> computed = Lists.newArrayList(arguments);
         computed.addAll(appendArguments);

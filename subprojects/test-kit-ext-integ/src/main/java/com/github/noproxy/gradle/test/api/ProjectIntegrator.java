@@ -43,6 +43,9 @@ public interface ProjectIntegrator extends Closeable, AutoCloseable {
 
     void property(Map<String, String> properties);
 
+    void src(@DelegatesTo(value = SrcIntegrator.class,
+            strategy = Closure.DELEGATE_FIRST) Closure srcConfigure);
+
     void android(@DelegatesTo(value = AndroidIntegrator.class,
             strategy = Closure.DELEGATE_FIRST) Closure androidConfigure);
 }

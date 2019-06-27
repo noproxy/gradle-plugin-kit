@@ -73,7 +73,7 @@ class PropertyPromotingLoggerFactoryTest extends UnitSpecification {
     @Unroll
     def "log level promoted to #expectLevel if project property has value #propertyValue"(String propertyValue, LogLevel expectLevel) {
         final String LOG_SWITCH = "logSwitch"
-        property(LOG_SWITCH, propertyValue)
+//        property(LOG_SWITCH, propertyValue)
 
         final Project project = Mock(Project)
 

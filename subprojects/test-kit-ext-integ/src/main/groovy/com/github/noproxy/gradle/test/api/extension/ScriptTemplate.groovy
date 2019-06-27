@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.noproxy.android.plugin.internal;
+package com.github.noproxy.gradle.test.api.extension
 
-import org.gradle.api.GradleException;
+import spock.lang.Specification
 
-import org.jetbrains.annotations.Nullable;
-
-public class ExternalException extends GradleException {
-    public ExternalException() {
-    }
-
-    public ExternalException(String message) {
-        super(message);
-    }
-
-    public ExternalException(String message, @Nullable Throwable cause) {
-        super(message, cause);
+class ScriptTemplate {
+    static String jcenter(Specification self) {
+        return """repositories {
+    jcenter()
+}
+"""
     }
 }

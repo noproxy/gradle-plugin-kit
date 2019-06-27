@@ -19,14 +19,13 @@ package com.github.noproxy.gradle.test.internal;
 import com.github.noproxy.gradle.test.api.AndroidIntegrator;
 import com.github.noproxy.gradle.test.api.FileIntegrator;
 import com.github.noproxy.gradle.test.api.ProjectIntegrator;
-
+import com.github.noproxy.gradle.test.api.SrcIntegrator;
+import groovy.lang.Closure;
 import org.gradle.api.Action;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-
-import groovy.lang.Closure;
 
 public class DefaultProjectIntegrator implements ProjectIntegrator {
     private final FileIntegratorInternal integrator;
@@ -71,6 +70,14 @@ public class DefaultProjectIntegrator implements ProjectIntegrator {
     @Override
     public void property(String propertyKey, String propertyValue) {
         properties(Actions.appendText(propertyKey + "=" + propertyValue + "\n"));
+    }
+
+
+    @Override
+    public void src(Closure srcConfigure) {
+        final SrcIntegrator src = new DefaultSrcIntegrator(integrator);
+        srcConfigure.setDelegate(src);
+        srcConfigure.call();
     }
 
     @Override

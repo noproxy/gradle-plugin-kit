@@ -19,7 +19,7 @@ package com.github.noproxy.android.plugin.internal;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.internal.exceptions.Contextual;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 @Contextual
 public class InvalidUsageException extends InvalidUserDataException {
