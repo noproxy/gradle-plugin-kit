@@ -35,7 +35,7 @@ dependencies {
 }
 
 // publishing
-assert ("com.github.noproxy" == group)
+assert ("io.github.noproxy" == group)
 assert ("android-plugin-kit-plugin" == name)
 version = "0.0.1"
 
@@ -58,7 +58,7 @@ pluginBundle {
     website = "https://noproxy.github.io/${rootProject.name}"
     vcsUrl = "https://github.com/noproxy/${rootProject.name}"
     description = "A plugin to help developing gradle plugin based on android Gradle Plugin."
-    tags = ["gradle", "gradle plugin", "android"]
+    tags = ["gradle", "gradle plugin development", "android"]
 
     plugins {
         androidPluginKitPlugin {

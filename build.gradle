@@ -32,7 +32,7 @@ allprojects {
     repositories {
         jcenter()
     }
-    group = "com.github.noproxy"
+    group = "io.github.noproxy"
 
 
     dependencies {

@@ -38,7 +38,7 @@ dependencies {
 }
 
 // publishing
-assert ("com.github.noproxy" == group)
+assert ("io.github.noproxy" == group)
 assert ("test-kit-ext" == name)
 version = "0.0.6"
 

@@ -69,7 +69,7 @@ file:/usr/local/Cellar/gradle/5.4.1/libexec/lib/gradle-core-5.4.1.jar
 
 
 // publishing
-assert ("com.github.noproxy" == group)
+assert ("io.github.noproxy" == group)
 assert ("test-kit-ext-integ" == name)
 version = "0.0.6"
 

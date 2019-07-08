@@ -34,7 +34,7 @@ dependencies {
 
 
 // publishing
-assert ("com.github.noproxy" == group)
+assert ("io.github.noproxy" == group)
 assert ("android-plugin-kit" == name)
 version = "0.0.1"
 
