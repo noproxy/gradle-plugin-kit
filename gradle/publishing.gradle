@@ -41,11 +41,37 @@ task groovydocJar(type: Jar) {
     dependsOn(groovydoc)
 }
 
+static def toSpacedString(String text) {
+    return text.replaceAll(/\B[A-Z]/) { ' ' + it }.toLowerCase()
+}
+
 publishing {
     repositories {
         maven {
             name = "BuildDir"
             url = uri(rootProject.file("build/repo"))
+        }
+    }
+    def configurePublishingTaskGroup = { String repoName ->
+        tasks.all { task ->
+            if (name.endsWith("To${repoName}Repository") || name.endsWith("To${repoName}")) {
+                afterEvaluate {
+                    println "set task " + task
+                    task.group = "publishing to ${toSpacedString(repoName)}"
+                }
+            }
+        }
+    }
+    repositories.all { configurePublishingTaskGroup(name.capitalize()) }
+    configurePublishingTaskGroup("MavenLocal")
+
+    // we have to `afterEvaluate` because of https://github.com/gradle/gradle/issues/8906
+    afterEvaluate {
+        tasks.withType(GenerateMavenPom) {
+            group = "other"
+        }
+        tasks.withType(GenerateModuleMetadata) {
+            group = "other"
         }
     }
     publications.withType(MavenPublication).all {
