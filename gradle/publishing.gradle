@@ -20,7 +20,7 @@ task sourcesJar(type: Jar) {
     group = "build"
     archiveClassifier.set("sources")
     from(sourceSets.main.allSource) {
-        include("**/api/**.java")
+        exclude("**/internal/**")
     }
     dependsOn(tasks.named("classes"))
 }
