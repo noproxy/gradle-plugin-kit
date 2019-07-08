@@ -14,14 +14,6 @@
  * limitations under the License.
  */
 
-// If tests failed, the generated files were not deleted. So clean before tests.
-tasks.withType(Test) {
-    doFirst {
-        // If tests failed in previous building, the generated files were not deleted. So clean before tests.
-        file("build/tmp/testfiles").deleteDir()
-    }
-}
-
 sourceSets {
     integrationTest {
         groovy.srcDir file('src/integTest/groovy')

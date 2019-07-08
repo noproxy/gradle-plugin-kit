@@ -44,4 +44,6 @@ allprojects {
             html.enabled true
         }
     }
+
+    apply from: rootProject.file("gradle/test_common.gradle")
 }
