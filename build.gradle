@@ -23,9 +23,6 @@ buildscript {
         maven { url 'https://jitpack.io' }
         mavenLocal()
     }
-    dependencies {
-        classpath("com.github.noproxy:android-plugin-kit-plugin:0.0.1")
-    }
 }
 
 allprojects {
