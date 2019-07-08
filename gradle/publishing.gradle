@@ -56,7 +56,6 @@ publishing {
         tasks.all { task ->
             if (name.endsWith("To${repoName}Repository") || name.endsWith("To${repoName}")) {
                 afterEvaluate {
-                    println "set task " + task
                     task.group = "publishing to ${toSpacedString(repoName)}"
                 }
             }
