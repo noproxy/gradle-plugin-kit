@@ -1,3 +1,5 @@
 = Gradle Plugin Kit
 
+image:https://api.codacy.com/project/badge/Grade/9137ea28e2ae4b77b4c07015e3d7edc7["Codacy code quality", link="https://www.codacy.com/app/noproxy/gradle-plugin-kit?utm_source=github.com&utm_medium=referral&utm_content=noproxy/gradle-plugin-kit&utm_campaign=Badge_Grade"]
 image:https://travis-ci.org/noproxy/gradle-plugin-kit.svg?branch=master["Build Status", link="https://travis-ci.org/noproxy/gradle-plugin-kit"]
+image:https://codecov.io/gh/noproxy/gradle-plugin-kit/branch/master/graph/badge.svg["codecov",link="https://codecov.io/gh/noproxy/gradle-plugin-kit"]
