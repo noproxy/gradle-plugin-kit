@@ -16,8 +16,8 @@
 
 sourceSets {
     integrationTest {
-        groovy.srcDir file('src/integTest/groovy')
-        resources.srcDir file('src/integTest/resources')
+        groovy.srcDir file('src/integrationTest/groovy')
+        resources.srcDir file('src/integrationTest/resources')
         compileClasspath += sourceSets.main.output + configurations.testRuntime
         runtimeClasspath += output
 //        + configurations.testRuntime
@@ -30,6 +30,9 @@ task integrationTest(type: Test) {
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
     mustRunAfter test
+    tasks.withType(PluginUnderTestMetadata).all {
+        integrationTest.dependsOn(delegate)
+    }
 }
 
 check.dependsOn integrationTest
@@ -40,4 +43,5 @@ dependencies {
     integrationTestImplementation(project(":test-kit-ext-integ"))
     // mock system env and streams
     testImplementation 'com.github.stefanbirkner:system-rules:1.19.0'
+    integrationTestImplementation 'com.github.stefanbirkner:system-rules:1.19.0'
 }

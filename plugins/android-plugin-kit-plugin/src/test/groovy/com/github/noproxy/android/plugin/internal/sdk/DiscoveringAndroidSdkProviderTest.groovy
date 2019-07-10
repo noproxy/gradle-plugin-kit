@@ -17,7 +17,9 @@
 package com.github.noproxy.android.plugin.internal.sdk
 
 import com.github.noproxy.gradle.test.api.template.UnitSpecification
+import org.gradle.api.Project
 import org.gradle.api.logging.Logger
+import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Rule
 import org.junit.contrib.java.lang.system.EnvironmentVariables
 import spock.lang.Unroll
@@ -28,9 +30,13 @@ class DiscoveringAndroidSdkProviderTest extends UnitSpecification {
     @Rule
     EnvironmentVariables environmentVariables = new EnvironmentVariables()
 
+    Project getProject() {
+        return ProjectBuilder.builder().withProjectDir(root).build()
+    }
+
     @Unroll
     def "can discover from local properties #propertyName"(String propertyName) {
-        def provider = new DiscoveringAndroidSdkProvider(rootProject, Stub(Logger))
+        def provider = new DiscoveringAndroidSdkProvider(project, Stub(Logger))
 
         given:
         newFile('local.properties') << "$propertyName=/test/android/home"
@@ -47,7 +53,7 @@ class DiscoveringAndroidSdkProviderTest extends UnitSpecification {
     @Unroll
     @RestoreSystemProperties
     def "can discover from system property #propertyName"(String propertyName) {
-        def provider = new DiscoveringAndroidSdkProvider(rootProject, Stub(Logger))
+        def provider = new DiscoveringAndroidSdkProvider(project, Stub(Logger))
 
         given:
         System.setProperty(propertyName, TEST_ANDROID_HOME)
@@ -62,7 +68,7 @@ class DiscoveringAndroidSdkProviderTest extends UnitSpecification {
 
     @Unroll
     def "can discover from system env #propertyName"(String propertyName) {
-        def provider = new DiscoveringAndroidSdkProvider(rootProject, Stub(Logger))
+        def provider = new DiscoveringAndroidSdkProvider(project, Stub(Logger))
         given:
         environmentVariables.set(propertyName, TEST_ANDROID_HOME)
 
@@ -77,7 +83,7 @@ class DiscoveringAndroidSdkProviderTest extends UnitSpecification {
 
     def "throw AndroidSdkNotFoundException when no sdk found"() {
         def logger = Mock(Logger)
-        def provider = new DiscoveringAndroidSdkProvider(rootProject, logger)
+        def provider = new DiscoveringAndroidSdkProvider(project, logger)
 
         when:
         provider.computeSdkHome()

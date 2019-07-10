@@ -36,6 +36,13 @@ allprojects {
         components.all(HamcrestCapability)
     }
 
+    project.plugins.withId('java') {
+        java {
+            targetCompatibility = JavaVersion.VERSION_1_8
+            sourceCompatibility = JavaVersion.VERSION_1_8
+        }
+    }
+
     apply plugin: 'checkstyle'
     apply plugin: "com.github.spotbugs"
     tasks.withType(SpotBugsTask) {

@@ -15,7 +15,7 @@
  */
 
 plugins {
-    `java-library`
+    id 'java-library'
 }
 
 dependencies {
@@ -26,29 +26,10 @@ dependencies {
 
 // test
 dependencies {
-    components.all(HamcrestCapability::class.java)
     api("org.hamcrest:hamcrest:2.1")
     api("net.bytebuddy:byte-buddy:1.9.2")
     api("org.objenesis:objenesis:3.0.1")
     api("org.spockframework:spock-core:1.2-groovy-2.5") {
-        exclude(group = "org.codehaus.groovy", module = "groovy-all")
-    }
-}
-
-class HamcrestCapability : ComponentMetadataRule {
-    companion object {
-        val HAMCRESTS = listOf("hamcrest-core", "hamcrest-integration", "hamcrest-library")
-    }
-
-    override fun execute(context: ComponentMetadataContext) {
-        context.details.let {
-            if (it.id.name in HAMCRESTS) {
-                it.allVariants {
-                    withCapabilities {
-                        addCapability("org.hamcrest", "hamcrest", it.id.version + "." + HAMCRESTS.indexOf(it.id.name))
-                    }
-                }
-            }
-        }
+        exclude(group: "org.codehaus.groovy", module: "groovy-all")
     }
 }

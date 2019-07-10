@@ -75,8 +75,7 @@ public class OutputTaskReview implements TaskReview {
         return !taskNotExecuted(task)
                 && !taskNotExecuted(task)
                 && !taskFromCached(task)
-                && !taskNoSource(task)
-                ;
+                && !taskNoSource(task);
     }
 
     @Override

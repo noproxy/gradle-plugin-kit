@@ -14,15 +14,6 @@
  *    limitations under the License.
  */
 
-
-include("test-kit-annotations")
-include("test-kit-ext")
-include("test-kit-ext-integ")
-include("android-plugin-kit")
-include("init-scripts")
-
-project(":init-scripts").buildFileName = "init-scripts.gradle"
-
 file('subprojects').eachDir { subproject ->
     include subproject.name
     project(":${subproject.name}").projectDir = subproject

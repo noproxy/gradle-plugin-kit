@@ -16,20 +16,17 @@
 
 package com.github.noproxy.gradle.test.internal;
 
-import com.google.common.base.Objects;
 import groovy.lang.Closure;
 import org.gradle.api.Action;
 import org.gradle.util.Configurable;
+
+import java.util.Objects;
 
 public class ClosureBackedAction<T> implements Action<T> {
 
     private final Closure closure;
     private final int resolveStrategy;
     private final boolean configurableAware;
-
-    public static <T> ClosureBackedAction<T> of(Closure<?> closure) {
-        return new ClosureBackedAction<T>(closure);
-    }
 
     public ClosureBackedAction(Closure closure) {
         this(closure, Closure.DELEGATE_FIRST, true);
@@ -43,6 +40,10 @@ public class ClosureBackedAction<T> implements Action<T> {
         this.closure = closure;
         this.resolveStrategy = resolveStrategy;
         this.configurableAware = configurableAware;
+    }
+
+    public static <T> ClosureBackedAction<T> of(Closure<?> closure) {
+        return new ClosureBackedAction<T>(closure);
     }
 
     public static <T> void execute(T delegate, Closure<?> closure) {
@@ -68,7 +69,7 @@ public class ClosureBackedAction<T> implements Action<T> {
                 }
             }
         } catch (groovy.lang.MissingMethodException e) {
-            if (Objects.equal(e.getType(), closure.getClass()) && Objects.equal(e.getMethod(), "doCall")) {
+            if (Objects.equals(e.getType(), closure.getClass()) && Objects.equals(e.getMethod(), "doCall")) {
                 throw new RuntimeException();
             }
             throw e;
