@@ -64,7 +64,8 @@ publishing {
     repositories.all { configurePublishingTaskGroup(name.capitalize()) }
     configurePublishingTaskGroup("MavenLocal")
 
-    // we have to `afterEvaluate` because of https://github.com/gradle/gradle/issues/8906
+    // we have to `afterEvaluate` because some tasks are registered by 'com.gradle.plugin-publish' after evaluating
+    // See also: https://github.com/gradle/gradle/issues/8906
     afterEvaluate {
         tasks.withType(GenerateMavenPom) {
             group = "other"
