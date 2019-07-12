@@ -40,12 +40,16 @@ settingsEvaluated { Settings settings ->
             return
         }
 
+        project.repositories {
+            jcenter()
+        }
         project.plugins.apply(org.asciidoctor.gradle.jvm.AsciidoctorJPlugin)
         project.asciidoctor {
+
             baseDirFollowsSourceDir()
-            sourceDir '.'
+            sourceDir project.properties.getOrDefault('dir', '.')
             sources {
-                include 'index*.adoc'
+                include project.properties.getOrDefault('sources', 'index*.adoc')
             }
             attributes(
                     toc: 'left',
