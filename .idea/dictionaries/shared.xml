@@ -5,11 +5,15 @@
       <w>bytebuddy</w>
       <w>codehaus</w>
       <w>hamcrests</w>
+      <w>ignorewarnings</w>
       <w>javapoet</w>
+      <w>jcenter</w>
+      <w>jitpack</w>
       <w>noproxy</w>
       <w>proguard</w>
       <w>spockframework</w>
       <w>squareup</w>
+      <w>subproject</w>
       <w>tencent</w>
       <w>testfiles</w>
     </words>
