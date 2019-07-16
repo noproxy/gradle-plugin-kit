@@ -31,7 +31,11 @@ asciidoctor {
             icons: 'font'
     )
     resources {
-        from'src/docs/asciidoc/downloads'
-        into 'downloads'
+        from('src/docs/asciidoc/downloads'){
+            into 'downloads'
+        }
+        from('src/docs/asciidoc/images'){
+            into 'images'
+        }
     }
 }

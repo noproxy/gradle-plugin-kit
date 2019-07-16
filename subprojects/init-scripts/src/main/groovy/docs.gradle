@@ -52,8 +52,17 @@ settingsEvaluated { Settings settings ->
                 include project.properties.getOrDefault('sources', 'index*.adoc')
             }
             resources {
-                from 'downloads'
-                into 'downloads'
+                from('downloads'){
+                    into 'downloads'
+                }
+                from('images'){
+                    into 'images'
+                }
+                from('.') {
+                    exclude '**/*.adoc'
+                    exclude 'build/'
+                    into '.'
+                }
             }
             attributes(
                     toc: 'left',
