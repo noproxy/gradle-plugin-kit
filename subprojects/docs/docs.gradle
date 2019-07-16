@@ -30,4 +30,8 @@ asciidoctor {
             imagesdir: './images',
             icons: 'font'
     )
+    resources {
+        from'src/docs/asciidoc/downloads'
+        into 'downloads'
+    }
 }

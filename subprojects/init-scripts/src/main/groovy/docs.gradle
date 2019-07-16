@@ -51,6 +51,10 @@ settingsEvaluated { Settings settings ->
             sources {
                 include project.properties.getOrDefault('sources', 'index*.adoc')
             }
+            resources {
+                from 'downloads'
+                into 'downloads'
+            }
             attributes(
                     toc: 'left',
                     toclevels: 2,
