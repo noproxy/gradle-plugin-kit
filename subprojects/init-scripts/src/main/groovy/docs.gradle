@@ -59,7 +59,7 @@ settingsEvaluated { Settings settings ->
                     toc: 'left',
                     toclevels: 2,
                     'source-highlighter': 'coderay',
-                    imagesdir: './images',
+                    imagesdir: 'images',
                     icons: 'font',
             )
             // translation
