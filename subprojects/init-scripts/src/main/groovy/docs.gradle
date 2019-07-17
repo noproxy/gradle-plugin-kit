@@ -159,7 +159,7 @@ pages:
   before_script:
     - curl -OL https://github.com/noproxy/gradle-plugin-kit/raw/master/subprojects/init-scripts/src/main/groovy/docs.gradle
   script:
-    - ./gradlew --init-script docs.gradle :docs:asciidoctor
+    - ./gradlew --init-script docs.gradle :asciidoctor
   after_script:
     - mv docs/build/docs/asciidoc public
   artifacts:
