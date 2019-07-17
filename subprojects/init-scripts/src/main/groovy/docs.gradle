@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-initscript {
+initscript { // ScriptHandler
     repositories {
         maven { url "https://plugins.gradle.org/m2/" }
     }
@@ -23,22 +23,31 @@ initscript {
     }
 }
 
+// enable to skip other project configuring to avoid possible bad gradle scripts
+startParameter.configureOnDemand = true
+
 settingsEvaluated { Settings settings ->
     if (settings.findProject(':docs')) {
-        // do nothings
+        // do nothings because user setup everything in build.gradle
+        println "init script skip configure because has project ':docs', dir: '" + settings.findProject(':docs').projectDir.path + "'"
         return
     }
 
-    settings.include(':docs')
     def docs = new File(settings.rootDir, 'docs')
-    if (!docs.exists()) {
-        docs.mkdirs()
+    if (docs.exists()) {
+        // 1. we primary use 'docs' as root
+        settings.project(':').projectDir = new File(settings.rootDir, 'docs')
+    } else {
+        // 2. Finally, to use current dir as root
+        docs = settings.rootDir
     }
 
     beforeProject { Project project ->
-        if (project.path != ':docs') {
+        if (project != project.rootProject) {
             return
         }
+
+        project.logger.info("init script configure project '{}' as asciidoctor, dir: '{}'", project, project.projectDir)
 
         project.repositories {
             jcenter()
@@ -47,15 +56,19 @@ settingsEvaluated { Settings settings ->
         project.asciidoctor {
 
             baseDirFollowsSourceDir()
-            sourceDir project.properties.getOrDefault('dir', '.')
+            def sd = project.properties.getOrDefault('dir', '.')
+            project.logger.info("init script configure :docs > source dir =  {}", sd)
+            sourceDir sd
             sources {
-                include project.properties.getOrDefault('sources', 'index*.adoc')
+                def includes = project.properties.getOrDefault('sources', 'index*.adoc')
+                project.logger.info("init script configure :docs > include =  {}", includes)
+                include includes
             }
             resources {
-                from('downloads'){
+                from('downloads') {
                     into 'downloads'
                 }
-                from('images'){
+                from('images') {
                     into 'images'
                 }
                 from('.') {
@@ -70,6 +83,7 @@ settingsEvaluated { Settings settings ->
                     'source-highlighter': 'coderay',
                     imagesdir: 'images',
                     icons: 'font',
+                    sectnums: true
             )
             // translation
             attributes(
