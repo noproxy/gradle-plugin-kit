@@ -26,6 +26,23 @@ initscript { // ScriptHandler
 // enable to skip other project configuring to avoid possible bad gradle scripts
 startParameter.configureOnDemand = true
 
+
+settingsEvaluated { Settings settings ->
+    def rootDir = settings.settingsDir
+    allprojects { Project project ->
+        if (project != project.rootProject) {
+            return
+        }
+        def gitRoot = "git rev-parse --show-toplevel".execute(null, rootDir).text.trim()
+
+        project.task('initDocs') {
+            doLast {
+                setupGitlabCI(new File(gitRoot))
+            }
+        }
+    }
+}
+
 settingsEvaluated { Settings settings ->
     if (settings.findProject(':docs')) {
         // do nothings because user setup everything in build.gradle
@@ -109,5 +126,47 @@ settingsEvaluated { Settings settings ->
     }
 }
 
+
+def setupGitlabCI(File rootDir) {
+    def target = new File(rootDir, '.gitlab-ci.yml')
+    if (target.exists()) {
+        logger.warn("skip create .gitlab-ci.yml because it exist!")
+        return
+    }
+    logger.quiet("create .gitlab-ci.yml at {}", target.path)
+    target.createNewFile()
+    target << """image: javiersantos/android-ci:latest
+
+stages:
+  - pages
+
+variables:
+  GRADLE_OPTS: '-Dorg.gradle.daemon=false -Dorg.gradle.caching=true'
+  GRADLE_USER_HOME: '.gradle'
+
+before_script:
+  - chmod +x gradlew
+
+cache:
+  paths:
+    - .gradle/wrapper
+    - .gradle/caches
+
+pages:
+  tags:
+    - pages
+  stage: pages
+  before_script:
+    - curl -OL https://github.com/noproxy/gradle-plugin-kit/raw/master/subprojects/init-scripts/src/main/groovy/docs.gradle
+  script:
+    - ./gradlew --init-script docs.gradle :docs:asciidoctor
+  after_script:
+    - mv docs/build/docs/asciidoc public
+  artifacts:
+    paths:
+      - public
+  only:
+    - master"""
+}
 
 
