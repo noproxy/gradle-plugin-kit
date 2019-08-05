@@ -14,20 +14,8 @@
  * limitations under the License.
  */
 
-allprojects {
-    apply plugin: 'checkstyle'
-
-    // init task to create sample checkstyle config
-    if (project == rootProject) {
-        task("initCheckstyle") {
-            doLast {
-                def configDir = rootProject.file('config/checkstyle')
-                if (configDir.exists()) {
-                    throw new GradleException("checkstyle has initialized")
-                }
-                configDir.mkdirs()
-                rootProject.file('config/checkstyle/checkstyle.xml')
-                        .tap { createNewFile() } << """<?xml version="1.0"?>
+def getDefaultConfig() {
+    """<?xml version="1.0"?>
 <!DOCTYPE module PUBLIC
         "-//Puppy Crawl//DTD Check Configuration 1.2//EN"
         "http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
@@ -139,8 +127,10 @@ allprojects {
     </module>
 </module>
 """
-                rootProject.file('config/checkstyle/suppressions.xml')
-                        .tap { createNewFile() } << """<?xml version="1.0"?>
+}
+
+def getDefaultSuppressions() {
+    """<?xml version="1.0"?>
 <!DOCTYPE suppressions PUBLIC
         "-//Puppy Crawl//DTD Suppressions 1.1//EN"
         "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
@@ -151,21 +141,10 @@ allprojects {
 <!--              files=".*[/\\\\]app[/\\\\]src[/\\\\]main[/\\\\]src[/\\\\]META-INF[/\\\\]java[/\\\\]org.example.app.TestActivity"/>-->
 </suppressions>
 """
-            }
-        }
-    }
+}
 
-    // generate a config to run checkstyle for CI
-    def version = "0.1"
-    def generatedConfigFile = rootProject.file("generatedConfig/checkstyle/checkstyle-${version}.xml")
-    if (!rootProject.file('config/checkstyle/checkstyle.xml').exists()) {
-        if (project == rootProject) {
-            logger.lifecycle("Checkstyle use config: '{}'", generatedConfigFile.path)
-        }
-        if (project == rootProject && !generatedConfigFile.exists()) {
-            generatedConfigFile.parentFile.mkdirs()
-            generatedConfigFile.tap { createNewFile() } <<
-                    """<?xml version="1.0"?>
+def getGeneratedConfig() {
+    """<?xml version="1.0"?>
 <!DOCTYPE module PUBLIC
         "-//Puppy Crawl//DTD Check Configuration 1.2//EN"
         "http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
@@ -274,6 +253,40 @@ allprojects {
     </module>
 </module>
 """
+}
+
+allprojects {
+    apply plugin: 'checkstyle'
+
+    // init task to create sample checkstyle config
+    if (project == rootProject) {
+        task("initCheckstyle") {
+            doLast {
+                def configDir = rootProject.file('config/checkstyle')
+                if (configDir.exists()) {
+                    throw new GradleException("checkstyle has initialized")
+                }
+                configDir.mkdirs()
+                rootProject.file('config/checkstyle/checkstyle.xml').tap {
+                    createNewFile()
+                } << defaultConfig
+                rootProject.file('config/checkstyle/suppressions.xml').tap {
+                    createNewFile()
+                } << defaultSuppressions
+            }
+        }
+    }
+
+    // generate a config to run checkstyle for CI
+    def version = "0.1"
+    def generatedConfigFile = rootProject.file("generatedConfig/checkstyle/checkstyle-${version}.xml")
+    if (!rootProject.file('config/checkstyle/checkstyle.xml').exists()) {
+        if (project == rootProject) {
+            logger.lifecycle("Checkstyle use config: '{}'", generatedConfigFile.path)
+        }
+        if (project == rootProject && !generatedConfigFile.exists()) {
+            generatedConfigFile.parentFile.mkdirs()
+            generatedConfigFile.tap { createNewFile() } << generatedConfig
         }
         tasks.withType(Checkstyle) {
             configFile = generatedConfigFile
@@ -282,5 +295,9 @@ allprojects {
         if (project == rootProject) {
             logger.lifecycle("Checkstyle use default config, it may be 'config/checkstyle/checkstyle.xml' if you not change it.")
         }
+    }
+
+    project.tasks.withType(Checkstyle) {
+
     }
 }
