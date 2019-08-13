@@ -72,7 +72,7 @@ sleep 1
 printf -- '---------------------------------------------------------------\n\n'
 
 # shellcheck disable=SC2059
-printf "You can now use these command ${bold_black}in your project directory$normal:\n\n"
+printf "You can now use these command ${red}in your project directory$normal:\n\n"
 
 cmd 'checkstyles' 'generate checkstyle reports'
 cmd 'spotbugs' 'generate spotbug reports'
@@ -82,4 +82,5 @@ cmd 'checkstyle initCheckstyle' 'create sample checkstyle configuration in your 
 cmd 'doc :initDocs' 'create a set template documents in your project'
 echo
 
-echo -e "${red}You can use ${bold_green}update_ci_utils${red} to update all scripts at any time!"
+# shellcheck disable=SC2059
+printf "You can use ${bold_green}update_ci_utils${normal} to update all scripts at any time!\n"
