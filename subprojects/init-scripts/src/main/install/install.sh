@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 red='\033[0;31m'
 bold_black='\033[1;30m'
@@ -6,16 +6,16 @@ bold_green='\033[1;32m'
 
 normal='\033[0m'
 
-function fail() {
+fail() {
   printf "$red%s$normal\n" "$*"
   exit 1
 }
 
-function step() {
+step() {
   printf "$bold_green%s...$normal\n" "$*"
 }
 
-REMOTE_SCRIPT_HOME='https://github.com/noproxy/gradle-plugin-kit/raw/master/subprojects/init-scripts/src/main/groovy'
+REMOTE_SCRIPT_HOME='https://github.com/noproxy/gradle-plugin-kit/raw/master/subprojects/init-scripts/src/main/install'
 INSTALL_SCRIPT_NAME='install.sh'
 GRADLE_SCRIPT_NAMES=(checkstyle docs spotbugs)
 GRADLE_SCRIPT_DEST_DIR=$HOME/.gradle/scripts
@@ -48,15 +48,15 @@ alias update_ci_utils="curl -fsSL https://raw.githubusercontent.com/Homebrew/ins
 
 ' >"$ALIAS_SCRIPT"
 
-if (($(grep 'source .ci_alias' ~/.bashrc) != 1)); then
-  printf "\nsource .ci_alias\n" >>~/.bashrc || fail "fail updating .bashrc"
+if grep "source \$HOME/.ci_alias" ~/.bashrc; then
+  printf "\nsource \$HOME/.ci_alias\n" >>~/.bashrc || fail "fail updating .bashrc"
 fi
 
 # shellcheck source=/Users/yiyazhou/.bashrc
 source ~/.bashrc
 
 function cmd() {
-  printf "$bold_green%-30s$normal%s" "$1" "$2"
+  printf "$bold_green%-30s$normal%s\n" "$1" "$2"
 }
 
 printf "\n$bold_black%s\n$normal" 'Congratulations! Everything is done.'
@@ -68,7 +68,7 @@ cmd 'spotbugs' 'generate spotbug reports'
 cmd 'docs' 'generate documents'
 echo
 cmd 'checkstyle initCheckstyle' 'create sample checkstyle configuration in your project'
-cmd 'docs :initDocs' 'create a set template documents in your project'
+cmd 'doc :initDocs' 'create a set template documents in your project'
 echo
 
-echo "${red}You can use ${bold_green}update_ci_utils${red} to update all scripts at any time!"
+echo -e "${red}You can use ${bold_green}update_ci_utils${red} to update all scripts at any time!"
