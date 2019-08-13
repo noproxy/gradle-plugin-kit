@@ -15,8 +15,7 @@ step() {
   printf "$bold_green%s...$normal\n" "$*"
 }
 
-REMOTE_SCRIPT_HOME='https://github.com/noproxy/gradle-plugin-kit/raw/master/subprojects/init-scripts/src/main/install'
-INSTALL_SCRIPT_NAME='install.sh'
+REMOTE_SCRIPT_HOME='https://github.com/noproxy/gradle-plugin-kit/raw/master/subprojects/init-scripts/src/main/groovy'
 GRADLE_SCRIPT_NAMES=(checkstyle docs spotbugs)
 GRADLE_SCRIPT_DEST_DIR=$HOME/.gradle/scripts
 ALIAS_SCRIPT=$HOME/.ci_alias
@@ -25,16 +24,15 @@ step 'Download Gradle Scripts'
 mkdir -p "$GRADLE_SCRIPT_DEST_DIR"
 
 for name in "${GRADLE_SCRIPT_NAMES[@]}"; do
+  echo "  installing $name"
   curl -so "$GRADLE_SCRIPT_DEST_DIR/$name.gradle" -L "$REMOTE_SCRIPT_HOME/$name."gradle || fail "download fail: $REMOTE_SCRIPT_HOME/$name.gradle"
 done
 
 step 'Create Command Shortcut'
 
-if [ ! -f "$ALIAS_SCRIPT" ]; then
-  touch "$ALIAS_SCRIPT" || fail "fail creating file $ALIAS_SCRIPT"
-fi
-chmod u+x "$ALIAS_SCRIPT"
+sleep 2
 
+echo "  updating $ALIAS_SCRIPT"
 echo '#!/usr/bin/env sh
 alias checkstyle="./gradlew  --init-script ~/.gradle/scripts/checkstyle.gradle"
 alias spotbug="./gradlew  --init-script ~/.gradle/scripts/spotbugs.gradle"
@@ -44,22 +42,35 @@ alias checkstyles="checkstyle checkstyleMain checkstyleTest --continue --quiet"
 alias spotbugs="spotbug spotbugsMain spotbugsTest --continue --quiet"
 alias docs="doc :asciidoctor --continue --quiet"
 
-alias update_ci_utils="curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install | sh"
+alias update_ci_utils="curl -fsSL https://git.io/fj54t | sh"
 
 ' >"$ALIAS_SCRIPT"
 
-if grep "source \$HOME/.ci_alias" ~/.bashrc; then
-  printf "\nsource \$HOME/.ci_alias\n" >>~/.bashrc || fail "fail updating .bashrc"
-fi
+# shellcheck disable=SC2016
+INIT_CMD='test -e "$HOME/.ci_alias" && source "$HOME/.ci_alias"'
 
-# shellcheck source=/Users/yiyazhou/.bashrc
-source ~/.bashrc
+INIT_PROFILES=("$HOME"/.profile "$HOME"/.bash_profile "$HOME"/.zshrc)
+for profile in "${INIT_PROFILES[@]}"; do
+  if ! grep "$INIT_CMD" "$profile" >/dev/null 2>&1; then
+    echo "  updating $profile"
+    printf "\n%s\n" "$INIT_CMD" >>"$profile" || fail "fail updating $profile"
+  else
+    echo "  skip updating $profile"
+  fi
+done
 
-function cmd() {
+# shellcheck source=/Users/yiyazhou/.ci_alias
+source "$HOME"/.ci_alias
+
+cmd() {
   printf "$bold_green%-30s$normal%s\n" "$1" "$2"
 }
 
-printf "\n$bold_black%s\n$normal" 'Congratulations! Everything is done.'
+printf "$bold_green%s\n$normal" 'Congratulations! Everything is done.'
+sleep 1
+
+printf -- '---------------------------------------------------------------\n\n'
+
 # shellcheck disable=SC2059
 printf "You can now use these command ${bold_black}in your project directory$normal:\n\n"
 
