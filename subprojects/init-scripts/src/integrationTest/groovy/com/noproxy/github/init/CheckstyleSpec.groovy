@@ -16,9 +16,6 @@
 
 package com.noproxy.github.init
 
-import com.github.noproxy.gradle.test.api.extension.ScriptTemplate
-
-
 class CheckstyleSpec extends InitScriptIntegrateSpecification {
     @Override
     protected String getTestedScriptName() {
@@ -36,21 +33,22 @@ class CheckstyleSpec extends InitScriptIntegrateSpecification {
 
     def "can use against java project"() {
         given:
-        buildFile """
-plugins {
-    id 'java'
-}
-"""
-        use(ScriptTemplate) {
-            buildFile() << jcenter()
+        buildFile """\
+            plugins {
+                id 'java'
+            }
+            """
+        buildFile {
+            jcenter()
         }
 
         src {
-            java("org.example.Main") << """package org.example;
-public class Main {
-    public static void foo(){}
-}
-"""
+            java("org.example.Main") << """\
+                package org.example;
+                public class Main {
+                    public static void foo(){}
+                }
+                """
         }
 
         when:
