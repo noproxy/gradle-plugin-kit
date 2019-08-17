@@ -18,10 +18,13 @@ plugins {
     id 'java-gradle-plugin'
     id 'groovy'
     id 'com.gradle.plugin-publish' version '0.10.1'
+    id 'io.github.noproxy.android-plugin-kit-plugin' version '0.0.2'
 }
+apply from: rootProject.file('gradle/test_plugin.gradle')
 
 dependencies {
     implementation(gradleApi())
+    implementation project(':android-plugin-kit')
     implementation("org.jetbrains:annotations:13.0")
     implementation("org.apache.commons:commons-lang3:3.9")
 }
@@ -31,7 +34,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.android.tools.build:gradle:3.3.2")
+    compile "com.android.tools.build:gradle:3.3.2"
+    integrationTestCompile "com.android.tools.build:gradle:3.3.2"
 }
 
 // publishing
@@ -49,7 +53,7 @@ gradlePlugin {
     plugins {
         androidPublishPlugin {
             id = "${group}.${project.name}"
-            implementationClass = "io.github.noproxy.android.plugin.publish.AndroidPublishPlugin"
+            implementationClass = "io.github.noproxy.plugin.android.publish.AndroidPublishPlugin"
         }
     }
 }
@@ -66,5 +70,3 @@ pluginBundle {
         }
     }
 }
-
-apply from: rootProject.file('gradle/test_plugin.gradle')

@@ -14,18 +14,29 @@
  * limitations under the License.
  */
 
-package io.github.noproxy.android.plugin.publish;
+package io.github.noproxy.plugin.android.publish;
 
-import io.github.noproxy.android.plugin.publish.internal.AndroidPublishPluginImpl;
+import io.github.noproxy.plugin.android.publish.internal.AndroidPublishPluginImpl;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.component.SoftwareComponentFactory;
 import org.jetbrains.annotations.NotNull;
 
-@SuppressWarnings("unused")
+import javax.inject.Inject;
+
+@SuppressWarnings({"unused", "UnstableApiUsage"})
 public class AndroidPublishPlugin implements Plugin<Project> {
+    private final SoftwareComponentFactory softwareComponentFactory;
+
+    @Inject
+    public AndroidPublishPlugin(SoftwareComponentFactory softwareComponentFactory) {
+        this.softwareComponentFactory = softwareComponentFactory;
+    }
+
     @Override
     public void apply(@NotNull Project project) {
-        final AndroidPublishPluginImpl androidPublishPlugin = new AndroidPublishPluginImpl(project);
+        final AndroidPublishPluginImpl androidPublishPlugin = new AndroidPublishPluginImpl(project, softwareComponentFactory);
+        androidPublishPlugin.configureComponents();
         androidPublishPlugin.configureAndroidLibraryPublish();
     }
 }

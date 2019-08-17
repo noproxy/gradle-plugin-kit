@@ -16,421 +16,245 @@
 
 package io.github.noproxy.plugin.android.publish
 
+import com.github.noproxy.gradle.test.api.extension.MavenChecker
+import com.github.noproxy.gradle.test.api.extension.ScriptTemplate
 import com.github.noproxy.gradle.test.api.template.IntegrateSpecification
 
 class AndroidPublishPluginSpec extends IntegrateSpecification {
-    def "test publish aar to maven"() {
+    private static final String GROUP = 'org.example'
+    private static final String ARTIFACT = 'library'
+    private static final String VERSION = '1.0.0'
+    private static final String GAV = "$GROUP:$ARTIFACT:$VERSION"
+    private static final String PACKAGE_NAME = "$GROUP.$ARTIFACT"
+
+    def setup() {
+        use(ScriptTemplate) {
+            androidLibrary()
+            usePortalPlugin('io.github.noproxy.android-publish-plugin')
+
+            buildFile """
+                group = '$GROUP'
+                version = '$VERSION'
+                
+                publishing {
+                    repositories {
+                        maven {
+                            name = 'BuildDir'
+                            url = rootProject.file("build/repo")
+                        }
+                    }
+                }
+                """
+        }
+        android { manifest { packageName = PACKAGE_NAME } }
+        rootProjectName = ARTIFACT
+    }
+
+    def "publish produces module and variants"() {
         given:
         buildFile """
-plugins {
-    id 'io.github.noproxy.android-publish-plugin'
-    id 'com.android.application'
-}
+            dependencies {
+                implementation 'org.jetbrains:annotations:13.0'
+                api 'org.apache.commons:commons-lang3:3.9'
+                
+            // TODO use example library
+                debugImplementation "commons-io:commons-io:2.4"
+            //    releaseImplementation 'org.apache.commons:commons-lang3:3.9'
+            //
+            //    debugApi 'org.apache.commons:commons-lang3:3.9'
+            //    releaseApi 'org.apache.commons:commons-lang3:3.9'
+            }
+            """
 
-repositories {
-    jcenter()
-    google()
-}
+        when:
+        run "publish"
 
-android {
-    defaultConfig {
-        applicationId "org.example.app"
-        compileSdkVersion 28
+        then:
+        success()
+
+        and: 'module published'
+        use(MavenChecker) {
+            buildRepo {
+                module("$GAV") {
+                    pom {
+                        assertExists()
+                        assert text.contains('')
+                    }
+                    metadata {
+                        assert exists()
+                        text.contains('')
+                    }
+                    noOtherComponents()
+                }
+            }
+        }
+        and: 'variants published'
+        use(MavenChecker) {
+            buildRepo {
+                ['debug', 'release'].every {
+                    module("$GAV-debug") {
+                        pom {
+                            exists()
+                        }
+                        metadata {
+                            !exists()
+                        }
+                        aar.exists()
+                        noOtherComponents()
+                    }
+                }
+            }
+        }
     }
-}
 
-publishing {
-    repositories {
+    def "module can be consumed"() {
+        given:
         maven {
-            name = 'BuildDir'
-            url = rootProject.file("build/repo")
-        }
-    }
-}
+            module(GROUP, ARTIFACT, "$VERSION-debug", "aar") {
+                aar {
+                    classes {
+                        newClass('org.example.ClassInDebug', """\
+                            package org.example;
 
-"""
-        newFile("src/main/java/org/example/app/MainActivity.java") << "package org.example.app;\n" +
-                "\n" +
-                "import android.app.Activity;\n" +
-                "import android.os.Bundle;\n" +
-                "\n" +
-                "public class MainActivity extends Activity {\n" +
-                "\n" +
-                "    @Override\n" +
-                "    protected void onCreate(Bundle savedInstanceState) {\n" +
-                "        super.onCreate(savedInstanceState);\n" +
-                "        System.out.println(getResources().getString(R.string.app_name));" +
-                "    }\n" +
-                "}"
-        newFile("src/main/res/values/strings.xml") << """<resources>
-    <string name="app_name">Example Demo</string>
-</resources>
-"""
-        android {
-            manifest {
-                packageName = "org.example.app"
+                            public class ClassInDebug {
+                                public static void main(String[] args) {}
+                            }
+                            """.stripIndent()
+                        )
+                    }
+                }
+            }
+            module(GROUP, ARTIFACT, "$VERSION-release", "aar") {
+                aar {
+                    classes {
+                        newClass('org.example.ClassInRelease', """\
+                            package org.example;
+                            
+                            public class ClassInRelease {
+                                public static void main(String[] args) {}
+                            }
+                            """.stripIndent()
+                        )
+                    }
+                }
+            }
+            module(GROUP, ARTIFACT, VERSION, "pom") {
+                file(null, "module") {
+                    text = MODULE_TEXT
+                }
             }
         }
+        buildFile {
+            mavenDefaults()
+            append """\
+        dependencies {
+            implementation '$GAV'
+        }
+        
+        task resolve() {
+            doLast {
+                String conf = project.properties.get('configuration','no_option')
+//                def files = configurations.getByName(conf).incoming.artifactView{ config ->
+//                       config.attributes { container ->
+//                               container.attribute(Attribute.of("artifactType", String.class), "classes")
+//                           }
+//                }.artifacts.artifactFiles.files
 
-        when:
-        run "publishAndroidLibraryPublicationToBuildDir"
+                def files = configurations.getByName(conf).allArtifacts.artifactFiles.files
 
-        then:
-        def apk = file("build/repo/org/tinker/app/org.example.app/2.3-release/org.example.app-2.3-release.apk")
-        assert apk.exists()
-        def pom = file("build/repo/org/tinker/app/org.example.app/2.3-release/org.example.app-2.3-release.pom")
-        assert pom.exists()
-    }
-
-    def "test resolve apk from maven"() {
-        given:
-        buildFile """
-plugins {
-    id 'com.github.noproxy.tinker-maven-publish'
-    id 'com.android.application'
-    id 'com.tencent.tinker.patch'
-}
-
-repositories {
-    jcenter()
-    google()
-    maven {
-        name = 'BuildDir'
-        url = rootProject.file("build/repo")
-    }
-}
-
-android {
-    defaultConfig {
-        applicationId "org.example.app"
-        compileSdkVersion 28
-    }
-}
-
-tinkerPublish {
-    version = "2.3"
-}
-
-tinkerResolver {
-    version = "1.1"
-}
-
-tinkerPatch {
-    buildConfig {
-        tinkerId = "2.3"    
-    }
-    useSign = false
-    dex {
-        dexMode = "jar"
-        pattern = ["classes*.dex", "assets/secondary-dex-*.jar"]
-        loader = ["com.tencent.tinker.loader.*"]
-    }
-    lib {
-        pattern = ["lib/*/*.so"]
-    }
-    res {
-        pattern = ["res/*", "r/*", "assets/*", "resources.arsc", "AndroidManifest.xml"]
-        ignoreChange = ["assets/*_meta.txt"]
-        largeModSize = 100
-    }
-}
-
-"""
-        newFile("src/main/java/org/example/app/MainActivity.java") << "package org.example.app;\n" +
-                "\n" +
-                "import android.app.Activity;\n" +
-                "import android.os.Bundle;\n" +
-                "\n" +
-                "public class MainActivity extends Activity {\n" +
-                "\n" +
-                "    @Override\n" +
-                "    protected void onCreate(Bundle savedInstanceState) {\n" +
-                "        super.onCreate(savedInstanceState);\n" +
-                "        System.out.println(getResources().getString(R.string.app_name));" +
-                "    }\n" +
-                "}"
-        newFile("src/main/res/values/strings.xml") << """<resources>
-    <string name="app_name">Example Demo</string>
-</resources>
-"""
-        android {
-            manifest {
-                packageName = "org.example.app"
+                logger.quiet('{}:\\n {}', conf, files)
             }
         }
-
-        when:
-        run "help"
-        then:
-        noExceptionThrown()
-
-        when:
-        run "tinkerPatchRelease"
-        then:
-        fail()
-        assert output.contains("Could not resolve all files for configuration ':tinkerResolveApkClasspath'")
-        assert output.contains("Could not find org.tinker.app:org.example.app:1.1-release.")
-
-        when:
-        newFile("build/repo/org/tinker/app/org.example.app/1.1-release/org.example.app-1.1-release.apk") << binaryApk()
-        newFile("build/repo/org/tinker/app/org.example.app/1.1-release/org.example.app-1.1-release.pom") << pom()
-
-        systemExit.expectSystemExit()
-        run "tinkerPatchRelease"
-
-        then:
-        fail()
-        assert output.contains("")
-        with(output) {
-            contains "Can not find the R.txt file in Maven Repository, continue build without R file."
-            contains "Tinker patch begin"
-            contains "oldApk:${root}/build/repo/org/tinker/app/org.example.app/1.1-release/org.example.app-1.1-release.apk"
-            contains "newApk:${root}/build/outputs/apk/release/${root.name}-release-unsigned.apk"
-
+        """
         }
+
+        when:
+        run 'resolve', '-Pconfiguration=debugCompileClasspath', '--debug'
+
+        then:
+        success()
+
+        output.contains('example')
     }
 
-    def "test resolve apk mapping and r from maven"() {
-        given:
-        buildFile """
-plugins {
-    id 'com.github.noproxy.tinker-maven-publish'
-    id 'com.android.application'
-    id 'com.tencent.tinker.patch'
+    public static def MODULE_TEXT = """{
+  "formatVersion": "1.0",
+  "component": {
+    "group": "org.example",
+    "module": "library",
+    "version": "1.0.0",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "5.6",
+      "buildId": "cq7gm44l75b5xoymzhwaculthi"
+    }
+  },
+  "variants": [
+    {
+      "name": "debugApiElements",
+      "attributes": {
+        "com.android.build.api.attributes.BuildTypeAttr": "debug",
+        "com.android.build.api.attributes.VariantAttr": "debug",
+        "com.android.build.gradle.internal.dependency.AndroidTypeAttr": "Aar",
+        "org.gradle.usage": "java-api"
+      },
+      "available-at": {
+        "url": "../../library/1.0.0-debug/library-1.0.0-debug.module",
+        "group": "org.example",
+        "module": "library",
+        "version": "1.0.0-debug"
+      }
+    },
+    {
+      "name": "debugRuntimeElements",
+      "attributes": {
+        "com.android.build.api.attributes.BuildTypeAttr": "debug",
+        "com.android.build.api.attributes.VariantAttr": "debug",
+        "com.android.build.gradle.internal.dependency.AndroidTypeAttr": "Aar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "available-at": {
+        "url": "../../library/1.0.0-debug/library-1.0.0-debug.module",
+        "group": "org.example",
+        "module": "library",
+        "version": "1.0.0-debug"
+      }
+    },
+    {
+      "name": "releaseApiElements",
+      "attributes": {
+        "com.android.build.api.attributes.BuildTypeAttr": "release",
+        "com.android.build.api.attributes.VariantAttr": "release",
+        "com.android.build.gradle.internal.dependency.AndroidTypeAttr": "Aar",
+        "org.gradle.usage": "java-api"
+      },
+      "available-at": {
+        "url": "../../library/1.0.0-release/library-1.0.0-release.module",
+        "group": "org.example",
+        "module": "library",
+        "version": "1.0.0-release"
+      }
+    },
+    {
+      "name": "releaseRuntimeElements",
+      "attributes": {
+        "com.android.build.api.attributes.BuildTypeAttr": "release",
+        "com.android.build.api.attributes.VariantAttr": "release",
+        "com.android.build.gradle.internal.dependency.AndroidTypeAttr": "Aar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "available-at": {
+        "url": "../../library/1.0.0-release/library-1.0.0-release.module",
+        "group": "org.example",
+        "module": "library",
+        "version": "1.0.0-release"
+      }
+    }
+  ]
 }
-
-repositories {
-    jcenter()
-    google()
-    maven {
-        name = 'BuildDir'
-        url = rootProject.file("build/repo")
-    }
-}
-
-android {
-    defaultConfig {
-        applicationId "org.example.app"
-        compileSdkVersion 28
-    }
-}
-
-tinkerPublish {
-    version = "2.3"
-}
-
-tinkerResolver {
-    version = "1.1"
-}
-
-tinkerPatch {
-    buildConfig {
-        tinkerId = "2.3"    
-    }
-    useSign = false
-    dex {
-        dexMode = "jar"
-        pattern = ["classes*.dex", "assets/secondary-dex-*.jar"]
-        loader = ["com.tencent.tinker.loader.*"]
-    }
-    lib {
-        pattern = ["lib/*/*.so"]
-    }
-    res {
-        pattern = ["res/*", "r/*", "assets/*", "resources.arsc", "AndroidManifest.xml"]
-        ignoreChange = ["assets/*_meta.txt"]
-        largeModSize = 100
-    }
-}
-
 """
-        newFile("src/main/java/org/example/app/MainActivity.java") << "package org.example.app;\n" +
-                "\n" +
-                "import android.app.Activity;\n" +
-                "import android.os.Bundle;\n" +
-                "\n" +
-                "public class MainActivity extends Activity {\n" +
-                "\n" +
-                "    @Override\n" +
-                "    protected void onCreate(Bundle savedInstanceState) {\n" +
-                "        super.onCreate(savedInstanceState);\n" +
-                "        System.out.println(getResources().getString(R.string.app_name));" +
-                "    }\n" +
-                "}"
-        newFile("src/main/res/values/strings.xml") << """<resources>
-    <string name="app_name">Example Demo</string>
-</resources>
-"""
-        android {
-            manifest {
-                packageName = "org.example.app"
-            }
-        }
-
-        when:
-        run "help"
-        then:
-        noExceptionThrown()
-
-        when:
-        newFile("build/repo/org/tinker/app/org.example.app/1.1-release/org.example.app-1.1-release.apk") << binaryApk()
-        newFile("build/repo/org/tinker/app/org.example.app/1.1-release/org.example.app-1.1-release-mapping.txt") << mappingContent()
-        newFile("build/repo/org/tinker/app/org.example.app/1.1-release/org.example.app-1.1-release-r.txt") << rContent()
-        newFile("build/repo/org/tinker/app/org.example.app/1.1-release/org.example.app-1.1-release.pom") << pom()
-
-        systemExit.expectSystemExit()
-        run "tinkerPatchRelease"
-
-        then:
-        fail()
-        assert !output.contains("Could not resolve all files for configuration ':tinkerResolveApkClasspath'")
-        assert !output.contains("Could not find org.tinker.app:org.example.app:1.1-release.")
-
-        with(output) {
-            contains "we build ${root.name} apk with apply resource mapping file ${root}/build/repo/org/tinker/app/org.example.app/1.1-release/org.example.app-1.1-release-r.txt"
-            contains "Tinker patch begin"
-            contains "oldApk:${root}/build/repo/org/tinker/app/org.example.app/1.1-release/org.example.app-1.1-release.apk"
-            contains "newApk:${root}/build/outputs/apk/release/${root.name}-release-unsigned.apk"
-        }
-    }
-
-    def "test resolve apk mapping and r from maven with ProGuard"() {
-        given:
-        buildFile """
-plugins {
-    id 'com.github.noproxy.tinker-maven-publish'
-    id 'com.android.application'
-    id 'com.tencent.tinker.patch'
-}
-
-repositories {
-    jcenter()
-    google()
-    maven {
-        name = 'BuildDir'
-        url = rootProject.file("build/repo")
-    }
-}
-
-android {
-    defaultConfig {
-        applicationId "org.example.app"
-        compileSdkVersion 28
-    }
-    
-    buildTypes {
-        release {
-            minifyEnabled = true
-            proguardFiles 'proguard-rules.pro'
-        }
-    }
-}
-
-tinkerPublish {
-    version = "2.3"
-}
-
-tinkerResolver {
-    version = "1.1"
-}
-
-tinkerPatch {
-    buildConfig {
-        tinkerId = "2.3"    
-    }
-    useSign = false
-    dex {
-        dexMode = "jar"
-        pattern = ["classes*.dex", "assets/secondary-dex-*.jar"]
-        loader = ["com.tencent.tinker.loader.*"]
-    }
-    lib {
-        pattern = ["lib/*/*.so"]
-    }
-    res {
-        pattern = ["res/*", "r/*", "assets/*", "resources.arsc", "AndroidManifest.xml"]
-        ignoreChange = ["assets/*_meta.txt"]
-        largeModSize = 100
-    }
-}
-
-"""
-        newFile("proguard-rules.pro") << "-ignorewarnings"
-        newFile("src/main/java/org/example/app/MainActivity.java") << "package org.example.app;\n" +
-                "\n" +
-                "import android.app.Activity;\n" +
-                "import android.os.Bundle;\n" +
-                "\n" +
-                "public class MainActivity extends Activity {\n" +
-                "\n" +
-                "    @Override\n" +
-                "    protected void onCreate(Bundle savedInstanceState) {\n" +
-                "        super.onCreate(savedInstanceState);\n" +
-                "        System.out.println(getResources().getString(R.string.app_name));" +
-                "    }\n" +
-                "}"
-        newFile("src/main/res/values/strings.xml") << """<resources>
-    <string name="app_name">Example Demo</string>
-</resources>
-"""
-        android {
-            manifest {
-                packageName = "org.example.app"
-            }
-        }
-
-        when:
-        run "help"
-        then:
-        noExceptionThrown()
-
-        when:
-        newFile("build/repo/org/tinker/app/org.example.app/1.1-release/org.example.app-1.1-release.apk") << binaryApk()
-        newFile("build/repo/org/tinker/app/org.example.app/1.1-release/org.example.app-1.1-release-mapping.txt") << mappingContent()
-        newFile("build/repo/org/tinker/app/org.example.app/1.1-release/org.example.app-1.1-release-r.txt") << rContent()
-        newFile("build/repo/org/tinker/app/org.example.app/1.1-release/org.example.app-1.1-release.pom") << pom()
-
-        systemExit.expectSystemExit()
-        run "tinkerPatchRelease"
-
-        then:
-        fail()
-        assert !output.contains("Could not resolve all files for configuration ':tinkerResolveApkClasspath'")
-        assert !output.contains("Could not find org.tinker.app:org.example.app:1.1-release.")
-        assert output.contains("Warning: org.example.app.MainActivity is not being kept as 'org.example.app.MainActivity', but remapped to 'test.a'")
-
-
-        with(output) {
-            contains "we build ${root.name} apk with apply resource mapping file ${root}/build/repo/org/tinker/app/org.example.app/1.1-release/org.example.app-1.1-release-r.txt"
-            contains "Tinker patch begin"
-            contains "oldApk:${root}/build/repo/org/tinker/app/org.example.app/1.1-release/org.example.app-1.1-release.apk"
-            contains "newApk:${root}/build/outputs/apk/release/${root.name}-release-unsigned.apk"
-        }
-    }
-
-    static String mappingContent() {
-        return "org.example.app.MainActivity -> test.a:\n"
-    }
-
-    static String rContent() {
-        return "int string app_name 0x7f0f0000\n"
-    }
-
-    static byte[] binaryApk() {
-        //noinspection SpellCheckingInspection
-        return Base64.decoder.decode("UEsDBAAAAAAIAAAAAADP0FwHOgIAAPQFAAATAAAAQW5kcm9pZE1hbmlmZXN0LnhtbJVTPW8TQRB968slF5xcHBMiQC5SUCCkXOgCdCFCAilJASIVjbEdY/kjp7OJoAGKFFF+B78A8SP4DYifQUUDb+fmcusl5uPst7f7dubN3OxsgAjfQ8CggRcBsI7ymTjzmGgQt4kD4pQ4Jz4Sn4kvxFeiboBDIiVOiW/EDyKuAHeJAfGO+ESEjPAKHQwJuxqgiZecD7iaw4irfGcVLRxznqLHvQ6eoY0+DjnLMCZ3TFvgxj9Y7XJskym1De5zrOIR3giXiu8GdjhLuTNPtsU8iyjRxfqEmOAtuQVyI+pmtOnxDdz0mITjiNYdGZMpzQT7jPZEqrrxF78W9+2qy/2MsRPs0fc5fXfxmN/wVL6lKbkP6Jvbl7n7/sAdnsCEvxQPsMXfmDb5mTQ5T37LJ6/xlsTo853Rdizr6QosT2W+iSM5lYmchs1kKB498tbfdtqK5NRljM7UWST6Pbb//mxhK9mUuDuXnFEqVe9z7MrJXxdvW48j0R3iIV5Llu0ZXfM/PgcXHQZ8MJHcHXabMURAZKEx49Aua1QFeB3wk8+i3rUK+TOHt0+N8zX+QudOBrofAbWGcnNym2yVEYS6f1XuUc6tKrfm+dr5NYdb1Dz2VK/IY0nzqDh5oPQz25XAxHK37P3JY847WpGjFV2iZRwt/t/HWoe6atVV65Z0e6m1olrFY23u8b3k2CyojXHiWe0rqm3fgZ6J71foxQ6/PEOvqnpVR8/3K3j/Gwrer1PB+2cReD1U9IqZ0Vu/AFBLAwQUAAAACAAAAAAAk5nEGVMAAABXAAAAFAAAAE1FVEEtSU5GL01BTklGRVNULk1G803My0xLLS7RDUstKs7Mz7NSMNQz4OVyKs3MKdF1qrRScE/NSy1KLElN0U2q1HV0CeHlci5KBfNBso55KUX5mSkK7kWJKTmpCsZ6xnpGvFy8XABQSwMEFAAAAAgAAAAAAMIgRgbwAwAAZAcAAAsAAABjbGFzc2VzLmRleHWVQWwbRRSG3+yu107iOE5D6qSkjVtCgVTKolIOyFVR4rhgadNYbmqpESjZ2IvZdjNreTcmkUANElcQAiQEyhVxQz0ULoDUikMvlRCqhDgg9cKBE0IIiVMF/+xMYtcptj69mffmzbx5Mzuv4W4PPv/Ci5Q+/fdnb61+9EF2/fOHlbEz938Z++7O/epfdxpJohYRbdfOHSH1+8QkOkNSPwqmGFECch0yBbkHOQT5K6QBeU4juonGLciOjrnALvgQ7IGvwNfge3Ab/ADuggdATDAOXgJXwdvgY/Al+Bb8CP4AGQQwC14GVbAKXgfXwQ54B+yC98Gn4AtwE3wDboOfwM/gAfgd/AmwdRokuZc0GAYZMAKyau8iKWPgCTAOjoIcOAZOkMyHpvI2oFjXpX1E6Y+r9pt6t93SxdpJOh2vPxDPIaQey2ycb9E3VXxPqv6UijMPGLxYLHWaieNgdIrEvgx6Jo5N2oeUTB9IopOxlH7DSp85GC/3nlLxG0pmEMyrpvRnCvGbUHLGlHK4z38SRLCdBSumzHG//T3oLyh/Fv+JbF2u3coacXSH9XFUaGtx/iq6PKsgz+gsbaDHs0lY0jTO2A2e15DXNPG8jn1netap/c86q316EwwyypxHhtBSc+zHTPHZMXUHzPMe96ILlJmvVOxycX6lvHxprbxIgwtXyvbi2srVSomyC1ue3ygG/A2vOXfN6TiUWCwtXHmFzIv2fG25SqxMzCbNLtNR2+GNduA1LKfVsubrkdfxop0CTR/o6wGPXB5ZbTe0qm4YbLXrbligsYMBQWgtbPGG7xbolN1w/I533XI4DyIn8gJulXjdD0KPN4u+E8LxxGPGlDl328p+8jH2JXdzQw0Qa4/bYlOWF1iVtsejy1HbdTYLdESqfYc3reWNa249elSHcQijT7cTRi58j9tBu2m5285my3fjXPTkUATdb15yPN5N17FD9upMqJYbO2wr0Givvzwjsyolq1G6VqpeFgdbXF4sdXuX5pdKpNVsYqs05NRxDuFF32mGlMKsa9zZdCnddKODU6IB9OSuyYjNqYAXkazIpREENaeCmoM76cFWRMmWSKjPKdl2fdcJXTLlNijRcfwtlzSDzU5ktIQ2bUw+lXtOM9nsFJsYNsXNnuz+E+/uGrfw1DBmonUvkTJ+S4i7n5wcQH/PFPd5UIwxzdzTuWenc2T8myPWgP6GvPfiu/sHMzxMyLtvwmfdpEd+fl9/tOeb2Zf79UbrqTnie9qvOwZ1a0+CuvXHpG4NYnlpE3VIz0u9eCtYVs4l3mUtL9cSdcrIS72In9R48cYl8jIO8dbpyvc1tE2lF2+ZKBBM1cr/AFBLAwQAAAAAAAAAAAAAcrULozQCAAA0AgAADgAHAHJlc291cmNlcy5hcnNjNdkDAAQAAAIADAA0AgAAAQAAAAEAHAAwAAAAAQAAAAAAAAAAAQAAIAAAAAAAAAAAAAAADAxFeGFtcGxlIERlbW8AAAACIAH4AQAAfwAAAG8AcgBnAC4AZQB4AGEAbQBwAGwAZQAuAGEAcABwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAQAAAAAAAFABAAAAAAAAAAAAAAEAHAAwAAAAAQAAAAAAAAAAAAAAIAAAAAAAAAAAAAAABgBzAHQAcgBpAG4AZwAAAAEAHAAsAAAAAQAAAAAAAAAAAQAAIAAAAAAAAAAAAAAACAhhcHBfbmFtZQAAAgIQABQAAAABAAAAAQAAAAAAAAABAlQAaAAAAAEAAAABAAAAWAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAIAAADAAAAAFBLAQIAAAAAAAAIAAAAAADP0FwHOgIAAPQFAAATAAAAAAAAAAAAAAAAAAAAAABBbmRyb2lkTWFuaWZlc3QueG1sUEsBAhgAFAAAAAgAAAAAAJOZxBlTAAAAVwAAABQAAAAAAAAAAAAAAAAAawIAAE1FVEEtSU5GL01BTklGRVNULk1GUEsBAhgAFAAAAAgAAAAAAMIgRgbwAwAAZAcAAAsAAAAAAAAAAAAAAAAA8AIAAGNsYXNzZXMuZGV4UEsBAgAAAAAAAAAAAAAAAHK1C6M0AgAANAIAAA4AAAAAAAAAAAAAAAAACQcAAHJlc291cmNlcy5hcnNjUEsFBgAAAAAEAAQA+AAAAHAJAAAAAA")
-    }
-
-    static String pom() {
-        """<?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.tinker.app</groupId>
-  <artifactId>org.example.app</artifactId>
-  <version>1.1-release</version>
-  <packaging>apk</packaging>
-</project>
-"""
-    }
 }
