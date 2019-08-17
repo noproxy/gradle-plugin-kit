@@ -33,7 +33,7 @@ allprojects {
 
 
     dependencies {
-        components.all(HamcrestCapability)
+//        components.all(HamcrestCapability)
     }
 
     project.plugins.withId('java') {
