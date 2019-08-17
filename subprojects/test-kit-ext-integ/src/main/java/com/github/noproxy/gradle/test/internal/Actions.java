@@ -16,48 +16,118 @@
 
 package com.github.noproxy.gradle.test.internal;
 
+import groovy.lang.Closure;
 import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 import org.gradle.api.Action;
 
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
-import groovy.lang.Closure;
+import static com.github.noproxy.gradle.test.internal.extension.DefaultMethods.indent;
+import static org.codehaus.groovy.runtime.ResourceGroovyMethods.getText;
 
 public class Actions {
-    public static Action<File> setText(String text) {
-        return file -> {
-            try {
-                ResourceGroovyMethods.setText(file, text, "UTF-8");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+    private static final Action ACTION_NOTHING = o -> {
+    };
+
+    public static <T> Action<T> nothing() {
+        //noinspection unchecked
+        return ACTION_NOTHING;
+    }
+
+    @SafeVarargs
+    public static <T> void execute(T target, Action<T>... action) {
+        composite(action).execute(target);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Action<T> composite(Action<T>... actions) {
+        switch (actions.length) {
+            case 0:
+                return nothing();
+            case 1:
+                return actions[0];
+            default:
+                return t -> {
+                    for (Action<T> action : actions) {
+                        action.execute(t);
+                    }
+                };
+        }
+    }
+
+    public static <T> Action<T> composite(Iterable<Action<T>> actions) {
+        return t -> {
+            for (Action<T> action : actions) {
+                action.execute(t);
             }
         };
     }
 
-    public static Action<File> appendText(String text) {
-        return file -> {
-            try {
-                ResourceGroovyMethods.append(file, text, "UTF-8");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+    @SafeVarargs
+    public static <T> Action<T> composite(Iterable<Action<T>> actions, Action<T>... others) {
+        return t -> {
+            for (Action<T> action : actions) {
+                action.execute(t);
+            }
+            for (Action<T> action : others) {
+                action.execute(t);
             }
         };
+    }
+
+    public static <T> Action<T> uncheckIO(UncheckIOAction<T> action) {
+        return t -> {
+            try {
+                action.execute(t);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        };
+    }
+
+    @Deprecated
+    public static Action<File> wrapText(int indentStep, String leading, String tailing) {
+        return uncheckIO(file -> {
+                    final String origin = ResourceGroovyMethods.getText(file, "UTF-8");
+                    ResourceGroovyMethods.setText(file, "\n" + leading + "\n", "UTF-8");
+                    ResourceGroovyMethods.append(file, indent(origin, indentStep));
+                    ResourceGroovyMethods.append(file, "\n" + tailing);
+                }
+        );
+    }
+
+    public static Action<File> setText(String text) {
+        return uncheckIO(file -> ResourceGroovyMethods.setText(file, text, "UTF-8"));
+    }
+
+    public static Action<File> append(Object text) {
+        return uncheckIO(file -> ResourceGroovyMethods.append(file, text, "UTF-8"));
+    }
+
+    public static Action<File> appendText(String text) {
+        return uncheckIO(file -> ResourceGroovyMethods.append(file, text, "UTF-8"));
     }
 
     public static <T> Action<T> of(Closure<?> closure) {
         return ClosureBackedAction.of(closure);
     }
 
+    public static <T> Iterable<Action<T>> of(Iterable<Closure> closure) {
+        final List result = StreamSupport.stream(closure.spliterator(), false)
+                .map(ClosureBackedAction::of).collect(Collectors.toList());
+        //noinspection unchecked
+        return (Iterable<Action<T>>) result;
+    }
+
     public static Action<File> createFile() {
-        return file -> {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        };
+        //noinspection ResultOfMethodCallIgnored
+        return uncheckIO(File::createNewFile);
     }
 
     public static Action<File> mkdirs() {
@@ -66,12 +136,19 @@ public class Actions {
     }
 
     public static Action<Closeable> close() {
-        return closeable -> {
-            try {
-                closeable.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        };
+        return uncheckIO(Closeable::close);
+    }
+
+    public static Action<File> restoreText(Action<File> action) {
+        return uncheckIO(file -> {
+            final String origin = getText(file, "UTF-8");
+            ResourceGroovyMethods.setText(file, "");
+            action.execute(file);
+            ResourceGroovyMethods.append(file, origin);
+        });
+    }
+
+    public interface UncheckIOAction<T> {
+        void execute(T t) throws IOException;
     }
 }

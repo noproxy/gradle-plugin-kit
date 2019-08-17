@@ -14,19 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.noproxy.gradle.test.internal;
+package com.github.noproxy.gradle.test.api;
 
-import com.github.noproxy.gradle.test.api.FileIntegrator;
+public class TemplateOptions {
+    private static final String DEFAULT_ANDROID_PLUGIN_VERSION = "3.4.2";
 
-import java.io.Closeable;
-import java.io.IOException;
-
-@Closer
-public interface FileIntegratorInternal extends FileIntegrator, HidingDirectoryProvider {
-    @ParameterWillBeClosed
-    void addCloseable(Closeable closeable);
-
-    @Closer
-    @Override
-    void close() throws IOException;
+    public static String getAndroidPluginVersion() {
+        return System.getProperty("noproxy.template.androidPluginVersion", DEFAULT_ANDROID_PLUGIN_VERSION);
+    }
 }

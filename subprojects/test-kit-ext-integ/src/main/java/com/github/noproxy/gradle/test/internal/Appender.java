@@ -16,22 +16,16 @@
 
 package com.github.noproxy.gradle.test.internal;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.github.noproxy.gradle.test.api.AppendableContext;
 
-/**
- * Indicate the annotated executable will close all incoming parameters with type {@link java.io.Closeable}.
- * <p>
- * When it's {@link ElementType#METHOD} or {@link ElementType#CONSTRUCTOR}, the closeable parameters will be close.
- */
-@Target({
-        ElementType.METHOD,
-        ElementType.CONSTRUCTOR
-})
-@Inherited
-@Retention(RetentionPolicy.RUNTIME)
-public @interface ParamertersWillBeClosed {
+import java.io.File;
+
+public interface Appender {
+    void appendTo(AppendableContext anotherContext);
+
+    default void appendTo(File file) {
+        appendTo(AppendableContext.of(file));
+    }
+
+    boolean isEmpty();
 }

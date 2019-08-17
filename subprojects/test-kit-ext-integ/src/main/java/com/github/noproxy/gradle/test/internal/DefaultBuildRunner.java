@@ -44,7 +44,7 @@ public class DefaultBuildRunner implements BuildRunner {
     private BuildResult result;
     private Throwable throwable;
 
-    @ParamertersWillBeClosed
+    @ParameterWillBeClosed
     public DefaultBuildRunner(FileIntegrator integrator) {
         this.integrator = integrator;
     }

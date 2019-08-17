@@ -16,13 +16,77 @@
 
 package com.github.noproxy.gradle.test.api.extension
 
-import spock.lang.Specification
+import com.github.noproxy.gradle.test.api.TemplateOptions
+import com.github.noproxy.gradle.test.api.template.IntegrateSpecification
 
 class ScriptTemplate {
-    static String jcenter(Specification self) {
-        return """repositories {
-    jcenter()
-}
-"""
+    static void androidLibrary(IntegrateSpecification self) {
+        useAndroidLibraryPlugin(self)
+
+        self.buildFile {
+            append """\
+            
+            ${jcenter()}
+            ${google()}
+            
+            android {
+                defaultConfig {
+                    compileSdkVersion 28
+                }
+            }"""
+        }
+    }
+
+    static void usePortalPlugin(IntegrateSpecification self, String id, String version = null, boolean apply = true) {
+        self.plugins {
+            append "id '$id'"
+            if (!apply) {
+                append ", apply false"
+            }
+        }
+    }
+
+    static void usePlugin(IntegrateSpecification self, String id = null,
+                          String classpath,
+                          String... mavenUrls = []) {
+        self.buildscript {
+            if (mavenUrls && mavenUrls.length > 0) {
+                append """repositories {"""
+                mavenUrls.each {
+                    append """\
+                    maven {
+                        url '$mavenUrl'
+                    }""".stripIndent()
+                }
+                append '\n}'
+            }
+            append """\
+                dependencies {
+                    classpath '$classpath'
+                }""".stripIndent()
+        }
+        if (id) {
+            self.buildFile {
+                append "\napply plugin: 'com.android.library'"
+            }
+        }
+    }
+
+    /*
+        static void useAndroidLibraryPlugin(IntegrateSpecification self, String version = null, boolean apply = true) {
+        def classpath = "com.android.tools.build:gradle:${version ?: TemplateOptions.getAndroidPluginVersion()}"
+        def id = apply ? 'com.android.library' : null
+        usePlugin(self, id, classpath)
+    }
+     */
+
+    static void useAndroidLibraryPlugin(IntegrateSpecification self, String version = TemplateOptions.getAndroidPluginVersion(), boolean apply = true) {
+        self.buildscript { google() }
+        usePlugin(self, apply ? 'com.android.library' : null, "com.android.tools.build:gradle:$version")
+    }
+
+    static void useAndroidApplicationPlugin(IntegrateSpecification self, String version = TemplateOptions.getAndroidPluginVersion(), boolean apply = true) {
+        self.buildscript { google() }
+        usePlugin(self, apply ? 'com.android.application' : null, "com.android.tools.build:gradle:$version")
     }
 }

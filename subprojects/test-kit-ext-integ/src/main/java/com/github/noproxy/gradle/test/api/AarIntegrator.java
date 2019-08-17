@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package com.github.noproxy.gradle.test.internal;
+package com.github.noproxy.gradle.test.api;
 
-import com.github.noproxy.gradle.test.api.FileIntegrator;
+import groovy.lang.Closure;
+import groovy.lang.DelegatesTo;
 
-import java.io.Closeable;
-import java.io.IOException;
+import java.io.File;
 
-@Closer
-public interface FileIntegratorInternal extends FileIntegrator, HidingDirectoryProvider {
-    @ParameterWillBeClosed
-    void addCloseable(Closeable closeable);
-
-    @Closer
-    @Override
-    void close() throws IOException;
+public interface AarIntegrator extends ZipIntegrator, AndroidIntegrator {
+    File classes(@DelegatesTo(value = JarIntegrator.class, strategy = Closure.DELEGATE_FIRST)
+                         Closure closure);
 }

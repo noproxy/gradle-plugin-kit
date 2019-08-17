@@ -17,27 +17,33 @@
 package com.github.noproxy.gradle.test.internal;
 
 import com.github.noproxy.gradle.test.api.FileIntegrator;
-
+import com.github.noproxy.gradle.test.api.ZipIntegrator;
 import com.google.common.collect.Sets;
+import groovy.lang.Closure;
 import org.gradle.api.Action;
 import org.gradle.api.NonNullApi;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
-import groovy.lang.Closure;
-
-import static com.github.noproxy.gradle.test.api.extension.KitDefaultMethods.configure;
-
 @NonNullApi
 public class DefaultFileIntegrator implements FileIntegrator, FileIntegratorInternal {
     private final File root;
     private final Set<Closeable> children = Sets.newHashSet();
+    @Nullable
+    private final FileIntegratorInternal parent;
 
     public DefaultFileIntegrator(File root) {
         this.root = root;
+        this.parent = null;
+    }
+
+    DefaultFileIntegrator(File root, FileIntegrator parent) {
+        this.root = root;
+        this.parent = (FileIntegratorInternal) parent;
     }
 
     @Override
@@ -47,7 +53,18 @@ public class DefaultFileIntegrator implements FileIntegrator, FileIntegratorInte
 
     @Override
     public File file(String path, Action<File> fileAction) {
-        return configure(file(path), fileAction);
+        final File file = file(path);
+        return configure(file, fileAction);
+    }
+
+    private <T> T configure(T t, Action<T> action) {
+        Integrators.with(t).configure(action);
+        return t;
+    }
+
+    private <T> T configure(T t, Closure action) {
+        Integrators.with(t).configure(action);
+        return t;
     }
 
     @Override
@@ -119,13 +136,25 @@ public class DefaultFileIntegrator implements FileIntegrator, FileIntegratorInte
     }
 
     @Override
+    public File newZip(String path, Action<ZipIntegrator> action) {
+        final File zipFile = file(path);
+        action.execute(Integrators.zip(zipFile, this));
+        return zipFile;
+    }
+
+    @Override
+    public File newZip(String path, Closure closure) {
+        return newZip(path, Actions.of(closure));
+    }
+
+    @Override
     public File getRoot() {
         return root;
     }
 
     @Override
     public FileIntegrator child(String path) {
-        return configure(new DefaultFileIntegrator(newDir(path)), this::addCloseable);
+        return configure(new DefaultFileIntegrator(newDir(path), this), this::addCloseable);
     }
 
     @Override
@@ -140,7 +169,7 @@ public class DefaultFileIntegrator implements FileIntegrator, FileIntegratorInte
 
     @Override
     public FileIntegrator child(File file) {
-        return configure(new DefaultFileIntegrator(newDir(file)), this::addCloseable);
+        return configure(new DefaultFileIntegrator(newDir(file), this), this::addCloseable);
     }
 
     @Override
@@ -153,6 +182,18 @@ public class DefaultFileIntegrator implements FileIntegrator, FileIntegratorInte
         return configure(child(file), closure);
     }
 
+    /**
+     * 1. Composition: Any children closeable should be closed before parent;
+     * 2. Inheritance: Derived closeable should be closed before super.
+     * <p>
+     * If your integrator has some resources to close:
+     * do it by {@link #addCloseable(Closeable)} if they should be closed before parent and this;
+     * or override {@link #close()} to close them after children(you can custom the order against parent by
+     * changing the call super location.)
+     *
+     * @throws IOException when some error happens
+     */
+    // TODO use Junit Rule impl auto close
     @Override
     public void close() throws IOException {
         children.forEach(closeable -> Actions.close().execute(closeable));
@@ -161,5 +202,35 @@ public class DefaultFileIntegrator implements FileIntegrator, FileIntegratorInte
     @Override
     public void addCloseable(Closeable closeable) {
         children.add(closeable);
+    }
+
+    @Override
+    public File newTempDir(String type, String name) {
+        return newTempFile(type, name).getRoot();
+    }
+
+    @Override
+    public FileIntegrator newTempFile(String type, String name) {
+        if (parent != null) {
+            return parent.newTempFile(type, name);
+        }
+
+        final String path = FileIntegrator.join(HIDING_DIRECTORY, type, name, "" + System.currentTimeMillis());
+        return child(newDir(path));
+    }
+
+    @Override
+    public FileIntegrator newFixDir(String type, String name) {
+        if (parent != null) {
+            return parent.newFixDir(type, name);
+        }
+
+        final String path = FileIntegrator.join(HIDING_DIRECTORY, type, name);
+        return child(newDir(path));
+    }
+
+    @Override
+    public FileIntegrator mavenDefaults() {
+        return newFixDir(MAVEN_DEFAULTS_TYPE, MAVEN_DEFAULTS_NAME);
     }
 }

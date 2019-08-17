@@ -16,17 +16,11 @@
 
 package com.github.noproxy.gradle.test.internal;
 
-import com.github.noproxy.gradle.test.api.FileIntegrator;
+public class NotImplementedError extends Error {
+    public NotImplementedError() {
+    }
 
-import java.io.Closeable;
-import java.io.IOException;
-
-@Closer
-public interface FileIntegratorInternal extends FileIntegrator, HidingDirectoryProvider {
-    @ParameterWillBeClosed
-    void addCloseable(Closeable closeable);
-
-    @Closer
-    @Override
-    void close() throws IOException;
+    public NotImplementedError(String message) {
+        super(message);
+    }
 }

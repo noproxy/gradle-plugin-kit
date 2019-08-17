@@ -48,10 +48,12 @@ dependencies {
     }
 
     implementation 'org.jetbrains:annotations:13.0'
-    implementation("commons-io:commons-io:2.4")
-    implementation("com.google.guava:guava:23.5-jre")
-    implementation("net.bytebuddy:byte-buddy:1.9.2")
-    implementation("org.objenesis:objenesis:3.0.1")
+    implementation "commons-io:commons-io:2.4"
+    implementation "com.google.guava:guava:26.0-jre"
+    implementation "org.apache.maven:maven-artifact:3.6.1"
+
+    implementation "net.bytebuddy:byte-buddy:1.9.2"
+    implementation "org.objenesis:objenesis:3.0.1"
 
 
     implementation(project(":test-kit-annotations"))

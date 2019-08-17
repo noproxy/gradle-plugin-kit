@@ -27,7 +27,7 @@ public class DefaultProjectRunner implements ProjectRunner {
     private Project project;
 
     //    @WillCloseWhenClosed
-    @ParamertersWillBeClosed
+    @ParameterWillBeClosed
     public DefaultProjectRunner(FileIntegrator integrator) {
         this.integrator = integrator;
     }

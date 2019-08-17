@@ -27,28 +27,66 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-public class DefaultProjectIntegrator implements ProjectIntegrator {
-    private final FileIntegratorInternal integrator;
+import static com.github.noproxy.gradle.test.internal.Actions.appendText;
+import static com.github.noproxy.gradle.test.internal.extension.DefaultMethods.indent;
+import static com.github.noproxy.gradle.test.internal.extension.DefaultMethods.wrap;
+import static org.codehaus.groovy.runtime.StringGroovyMethods.stripIndent;
 
-    public DefaultProjectIntegrator(FileIntegrator integrator) {
+// Only use for root project
+class DefaultProjectIntegrator implements ProjectIntegrator {
+    private final FileIntegratorInternal integrator;
+    private final ScriptContextInternal buildFile = GroovyFactory.createScriptContext();
+    private final ScriptContextInternal buildscript = GroovyFactory.createScriptContext();
+    private final PluginsContextInternal plugins = GroovyFactory.createPluginsContext();
+
+    DefaultProjectIntegrator(FileIntegrator integrator) {
         this.integrator = (FileIntegratorInternal) integrator;
-        ((FileIntegratorInternal) integrator).addCloseable(this);
     }
 
-    @Override
-    public File buildFile() {
+    private File getBuildGradleFile() {
         return integrator.newFile("build.gradle");
     }
 
     @Override
     public void buildFile(String append) {
-        Actions.appendText(append).execute(buildFile());
+        buildFile.append(append);
     }
 
     @Override
     public void buildFile(Closure closure) {
-        final File buildFile = buildFile();
+        closure = (Closure) closure.clone();
         closure.setDelegate(buildFile);
+        closure.call();
+    }
+
+    @Override
+    public void buildscript(Closure closure) {
+        closure = (Closure) closure.clone();
+        closure.setDelegate(buildscript);
+        closure.call();
+    }
+
+    @Override
+    public void plugins(Closure closure) {
+        closure = (Closure) closure.clone();
+        closure.setDelegate(plugins);
+        closure.call();
+    }
+
+    @Override
+    public File settings() {
+        return integrator.newFile("settings.gradle");
+    }
+
+    @Override
+    public void settings(String append) {
+        appendText(stripIndent((CharSequence) append)).execute(settings());
+    }
+
+    @Override
+    public void settings(Closure closure) {
+        closure = (Closure) closure.clone();
+        closure.setDelegate(settings());
         closure.call();
     }
 
@@ -69,13 +107,18 @@ public class DefaultProjectIntegrator implements ProjectIntegrator {
 
     @Override
     public void property(String propertyKey, String propertyValue) {
-        properties(Actions.appendText(propertyKey + "=" + propertyValue + "\n"));
+        properties(appendText(propertyKey + "=" + propertyValue + "\n"));
     }
 
+    @Override
+    public void setRootProjectName(String name) {
+        settings("\nrootProject.name = '" + name + "'\n");
+    }
 
     @Override
     public void src(Closure srcConfigure) {
         final SrcIntegrator src = new DefaultSrcIntegrator(integrator);
+        srcConfigure = (Closure) srcConfigure.clone();
         srcConfigure.setDelegate(src);
         srcConfigure.call();
     }
@@ -83,12 +126,24 @@ public class DefaultProjectIntegrator implements ProjectIntegrator {
     @Override
     public void android(Closure androidConfigure) {
         final AndroidIntegrator android = new DefaultAndroidIntegrator(integrator);
+        androidConfigure = (Closure) androidConfigure.clone();
         androidConfigure.setDelegate(android);
         androidConfigure.call();
     }
 
     @Override
     public void close() throws IOException {
-        integrator.newFile("settings.gradle");
+        wrap("buildscript {",
+                indent(buildscript, 1),
+                "}").appendTo(getBuildGradleFile());
+
+        wrap("plugins {",
+                indent(plugins, 1),
+                "}").appendTo(getBuildGradleFile());
+
+        buildFile.appendTo(getBuildGradleFile());
+
+        // ensure settings.gradle created
+        settings();
     }
 }

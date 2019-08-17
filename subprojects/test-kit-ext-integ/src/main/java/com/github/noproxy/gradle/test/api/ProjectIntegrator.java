@@ -16,24 +16,36 @@
 
 package com.github.noproxy.gradle.test.api;
 
+import groovy.lang.Closure;
+import groovy.lang.DelegatesTo;
 import org.gradle.api.Action;
 
 import java.io.Closeable;
 import java.io.File;
 import java.util.Map;
 
-import groovy.lang.Closure;
-import groovy.lang.DelegatesTo;
-
 public interface ProjectIntegrator extends Closeable, AutoCloseable {
-    File buildFile();
-
     void buildFile(String append);
 
-    void buildFile(
-            @DelegatesTo(value = File.class,
-                    strategy = Closure.DELEGATE_FIRST)
-                    Closure closure);
+    void buildFile(@DelegatesTo(value = ScriptContext.class,
+            strategy = Closure.DELEGATE_FIRST)
+                           Closure closure);
+
+    void buildscript(@DelegatesTo(value = ScriptContext.class,
+            strategy = Closure.DELEGATE_FIRST)
+                             Closure closure);
+
+    void plugins(@DelegatesTo(value = PluginsContext.class,
+            strategy = Closure.DELEGATE_FIRST)
+                         Closure closure);
+
+    File settings();
+
+    void settings(String append);
+
+    void settings(@DelegatesTo(value = File.class,
+            strategy = Closure.DELEGATE_FIRST)
+                          Closure closure);
 
     File properties();
 
@@ -42,6 +54,8 @@ public interface ProjectIntegrator extends Closeable, AutoCloseable {
     void property(String propertyKey, String propertyValue);
 
     void property(Map<String, String> properties);
+
+    void setRootProjectName(String name);
 
     void src(@DelegatesTo(value = SrcIntegrator.class,
             strategy = Closure.DELEGATE_FIRST) Closure srcConfigure);

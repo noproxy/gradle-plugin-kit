@@ -18,15 +18,19 @@ package com.github.noproxy.gradle.test.internal;
 
 import com.github.noproxy.gradle.test.api.FileIntegrator;
 
-import java.io.Closeable;
-import java.io.IOException;
+import java.io.File;
 
-@Closer
-public interface FileIntegratorInternal extends FileIntegrator, HidingDirectoryProvider {
-    @ParameterWillBeClosed
-    void addCloseable(Closeable closeable);
+public interface HidingDirectoryProvider {
+    String HIDING_DIRECTORY = ".tmp";
+    String MAVEN_DEFAULTS_TYPE = "maven";
+    String MAVEN_DEFAULTS_NAME = "defaults";
+    String MAVEN_DEFAULS_PATH = HIDING_DIRECTORY + File.separator + MAVEN_DEFAULTS_TYPE + File.separator + MAVEN_DEFAULTS_NAME;
 
-    @Closer
-    @Override
-    void close() throws IOException;
+    File newTempDir(String type, String name);
+
+    FileIntegrator newTempFile(String type, String name);
+
+    FileIntegrator newFixDir(String type, String name);
+
+    FileIntegrator mavenDefaults();
 }

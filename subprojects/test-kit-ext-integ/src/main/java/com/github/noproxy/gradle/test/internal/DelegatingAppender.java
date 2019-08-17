@@ -16,17 +16,21 @@
 
 package com.github.noproxy.gradle.test.internal;
 
-import com.github.noproxy.gradle.test.api.FileIntegrator;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.Closeable;
-import java.io.IOException;
+public abstract class DelegatingAppender implements Appender {
+    public Appender getDelegate() {
+        return delegate;
+    }
 
-@Closer
-public interface FileIntegratorInternal extends FileIntegrator, HidingDirectoryProvider {
-    @ParameterWillBeClosed
-    void addCloseable(Closeable closeable);
+    private final Appender delegate;
 
-    @Closer
+    protected DelegatingAppender(@NotNull Appender delegate) {
+        this.delegate = delegate;
+    }
+
     @Override
-    void close() throws IOException;
+    public boolean isEmpty() {
+        return delegate.isEmpty();
+    }
 }

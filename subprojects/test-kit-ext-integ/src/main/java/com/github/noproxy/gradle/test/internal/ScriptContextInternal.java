@@ -16,17 +16,9 @@
 
 package com.github.noproxy.gradle.test.internal;
 
-import com.github.noproxy.gradle.test.api.FileIntegrator;
+import com.github.noproxy.gradle.test.api.ScriptContext;
+import com.github.noproxy.gradle.test.internal.Appender;
 
-import java.io.Closeable;
-import java.io.IOException;
+public interface ScriptContextInternal extends ScriptContext, Appender {
 
-@Closer
-public interface FileIntegratorInternal extends FileIntegrator, HidingDirectoryProvider {
-    @ParameterWillBeClosed
-    void addCloseable(Closeable closeable);
-
-    @Closer
-    @Override
-    void close() throws IOException;
 }

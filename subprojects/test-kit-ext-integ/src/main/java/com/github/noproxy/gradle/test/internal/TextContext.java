@@ -16,17 +16,27 @@
 
 package com.github.noproxy.gradle.test.internal;
 
-import com.github.noproxy.gradle.test.api.FileIntegrator;
+import com.github.noproxy.gradle.test.api.AppendableContext;
+import com.google.common.collect.Lists;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.Closeable;
-import java.io.IOException;
+import java.util.List;
 
-@Closer
-public interface FileIntegratorInternal extends FileIntegrator, HidingDirectoryProvider {
-    @ParameterWillBeClosed
-    void addCloseable(Closeable closeable);
+public class TextContext implements AppendableContext, Appender {
+    private List<CharSequence> appendTexts = Lists.newArrayList();
 
-    @Closer
     @Override
-    void close() throws IOException;
+    public void appendTo(AppendableContext anotherContext) {
+        appendTexts.forEach(anotherContext::append);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return appendTexts.isEmpty();
+    }
+
+    @Override
+    public void append(@NotNull CharSequence text) {
+        appendTexts.add(text);
+    }
 }

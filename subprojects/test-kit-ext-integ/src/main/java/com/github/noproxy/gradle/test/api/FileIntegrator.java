@@ -17,17 +17,22 @@
 package com.github.noproxy.gradle.test.api;
 
 
+import com.github.noproxy.gradle.test.internal.Integrator;
+import com.google.common.base.Joiner;
+import groovy.lang.Closure;
+import groovy.lang.DelegatesTo;
 import org.gradle.api.Action;
 import org.gradle.api.NonNullApi;
 
 import java.io.Closeable;
 import java.io.File;
 
-import groovy.lang.Closure;
-import groovy.lang.DelegatesTo;
-
 @NonNullApi
-public interface FileIntegrator extends Closeable {
+public interface FileIntegrator extends Closeable, Integrator {
+    static String join(String... paths) {
+        return Joiner.on(File.separator).join(paths);
+    }
+
     File file(String path);
 
     File file(String path, Action<File> fileAction);
@@ -54,9 +59,13 @@ public interface FileIntegrator extends Closeable {
 
     File newFile(File file);
 
-    File newFile(File file, Action<File> fileAction);
+    File newFile(File file, Action<File> action);
 
     File newFile(File file, @DelegatesTo(File.class) Closure closure);
+
+    File newZip(String path, Action<ZipIntegrator> action);
+
+    File newZip(String path, @DelegatesTo(ZipIntegrator.class) Closure closure);
 
     File getRoot();
 

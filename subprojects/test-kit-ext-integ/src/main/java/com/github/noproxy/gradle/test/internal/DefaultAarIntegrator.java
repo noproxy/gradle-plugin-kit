@@ -16,29 +16,38 @@
 
 package com.github.noproxy.gradle.test.internal;
 
+import com.github.noproxy.gradle.test.api.AarIntegrator;
 import com.github.noproxy.gradle.test.api.AndroidIntegrator;
 import groovy.lang.Closure;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 
-class DefaultAndroidIntegrator implements AndroidIntegrator {
-    private static final String ANDROID_MANIFEST_XML_PATH = "src/main/AndroidManifest.xml";
-    private final FileIntegratorInternal integrator;
+class DefaultAarIntegrator extends DefaultZipIntegrator implements AarIntegrator {
+    private final AndroidIntegrator androidIntegrator = new DefaultAndroidIntegrator(this);
 
-    DefaultAndroidIntegrator(FileIntegratorInternal dir) {
-        this.integrator = dir;
+    DefaultAarIntegrator(@NotNull File destZipFile, @NotNull FileIntegratorInternal parent) {
+        super(destZipFile, parent);
     }
 
+    @Override
+    public File classes(Closure closure) {
+        final File classes = file("classes.jar");
+
+        closure = (Closure) closure.clone();
+        closure.setDelegate(Integrators.jar(classes, this));
+        closure.call();
+        return classes;
+    }
+
+    // begin: AndroidIntegrator
     @Override
     public void manifest(String content) {
-        Actions.setText(content).execute(integrator.newFile(ANDROID_MANIFEST_XML_PATH));
+        androidIntegrator.manifest(content);
     }
 
     @Override
-    public void manifest(Closure closure) {
-        final File manifest = integrator.newFile(ANDROID_MANIFEST_XML_PATH);
-        closure = (Closure) closure.clone();
-        closure.setDelegate(Integrators.manifest(manifest, integrator));
-        closure.call();
+    public void manifest(Closure manifestConfigure) {
+        androidIntegrator.manifest(manifestConfigure);
     }
 }

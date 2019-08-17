@@ -14,19 +14,8 @@
  * limitations under the License.
  */
 
-package com.github.noproxy.gradle.test.internal;
+package com.github.noproxy.gradle.test.api;
 
-import com.github.noproxy.gradle.test.api.FileIntegrator;
+public interface ScriptContext extends AppendableContext, HasRepositories {
 
-import java.io.Closeable;
-import java.io.IOException;
-
-@Closer
-public interface FileIntegratorInternal extends FileIntegrator, HidingDirectoryProvider {
-    @ParameterWillBeClosed
-    void addCloseable(Closeable closeable);
-
-    @Closer
-    @Override
-    void close() throws IOException;
 }

@@ -16,10 +16,7 @@
 
 package com.github.noproxy.gradle.test.api.template
 
-import com.github.noproxy.gradle.test.api.BuildRunner
-import com.github.noproxy.gradle.test.api.FileIntegrator
-import com.github.noproxy.gradle.test.api.ProjectIntegrator
-import com.github.noproxy.gradle.test.api.TaskReview
+import com.github.noproxy.gradle.test.api.*
 import com.github.noproxy.gradle.test.internal.*
 import org.junit.Rule
 import spock.lang.Specification
@@ -33,7 +30,7 @@ class IntegrateSpecification extends Specification {
     private FileIntegrator integrator = new DefaultFileIntegrator(testDirectoryProvider.getTestDirectory())
 
     @Delegate(parameterAnnotations = true)
-    private ProjectIntegrator project = new DefaultProjectIntegrator(integrator)
+    private ProjectIntegrator project = Integrators.project(integrator)
 
     @Closer
     @Delegate(parameterAnnotations = true)
@@ -41,4 +38,11 @@ class IntegrateSpecification extends Specification {
 
     @Delegate(parameterAnnotations = true)
     private TaskReview taskReview = new OutputTaskReview(runner)
+
+    private final MavenIntegrator mavenDefaults = Integrators.mavenDefaults(integrator)
+
+    void maven(@DelegatesTo(MavenIntegrator) Closure closure) {
+        closure.delegate = mavenDefaults
+        closure()
+    }
 }
