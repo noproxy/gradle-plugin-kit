@@ -19,8 +19,8 @@ package com.github.noproxy.gradle.test.internal;
 import com.github.noproxy.gradle.test.api.FileIntegrator;
 import com.github.noproxy.gradle.test.api.SrcIntegrator;
 import org.gradle.api.NonNullApi;
-
 import org.jetbrains.annotations.Nullable;
+
 import java.io.File;
 
 @NonNullApi
@@ -64,5 +64,15 @@ public class DefaultSrcIntegrator implements SrcIntegrator {
         }
 
         return java(packageName, classSimpleName);
+    }
+
+    @Override
+    public File res(String sourceSet, String folder, String filename) {
+        return integrator.newFile(FileIntegrator.join("src", sourceSet, "/res", "/", folder, "/", filename));
+    }
+
+    @Override
+    public File res(String folder, String filename) {
+        return res("main", folder, filename);
     }
 }

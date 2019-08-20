@@ -45,14 +45,14 @@ public class DefaultManifestIntegrator implements ManifestIntegrator {
                 "        android:label=\"Example App\"\n" +
                 "        android:theme=\"@android:style/Theme.Material.Light\">\n" +
                 "\n" +
-                "        <activity\n" +
-                "            android:name=\".MainActivity\"\n" +
-                "            android:label=\"@string/app_name\">\n" +
-                "            <intent-filter>\n" +
-                "                <action android:name=\"android.intent.action.MAIN\" />\n" +
-                "                <category android:name=\"android.intent.category.LAUNCHER\" />\n" +
-                "            </intent-filter>\n" +
-                "        </activity>\n" +
+//                "        <activity\n" +
+//                "            android:name=\".MainActivity\"\n" +
+//                "            android:label=\"@string/app_name\">\n" +
+//                "            <intent-filter>\n" +
+//                "                <action android:name=\"android.intent.action.MAIN\" />\n" +
+//                "                <category android:name=\"android.intent.category.LAUNCHER\" />\n" +
+//                "            </intent-filter>\n" +
+//                "        </activity>\n" +
                 "    </application>\n"
                 + MANIFEST_END).execute(manifest);
     }

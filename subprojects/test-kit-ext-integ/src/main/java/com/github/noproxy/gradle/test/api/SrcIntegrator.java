@@ -28,4 +28,8 @@ public interface SrcIntegrator {
     File java(@Nullable String pathOrPackageName, String simpleClassName);
 
     File java(String className);
+
+    File res(String sourceSet, String folder, String filename);
+
+    File res(String folder, String filename);
 }

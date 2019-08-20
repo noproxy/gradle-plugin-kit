@@ -72,6 +72,13 @@ class DefaultModuleIntegrator extends DefaultFileIntegrator implements ModuleInt
     }
 
     @Override
+    public void pom(Closure closure) {
+        final String filename = DefaultMavenIntegrator.artifactName(artifactId, version, "pom");
+        Integrators.with(file(filename))
+                .configure(closure);
+    }
+
+    @Override
     public void file(String classifier, String ext, Closure closure) {
         final String filename = DefaultMavenIntegrator.artifactName(artifactId, version, classifier, ext);
         Integrators.with(file(filename))

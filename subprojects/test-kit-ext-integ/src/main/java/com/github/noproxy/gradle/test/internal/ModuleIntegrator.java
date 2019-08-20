@@ -37,6 +37,8 @@ public interface ModuleIntegrator extends FileIntegrator {
     @NotNull
     String getVersion();
 
+    void pom(@DelegatesTo(value = File.class, strategy = Closure.DELEGATE_FIRST) Closure closure);
+
     void jar(String classifier, @DelegatesTo(value = JarIntegrator.class, strategy = Closure.DELEGATE_FIRST) Closure closure);
 
     void aar(String classifier, @DelegatesTo(value = AarIntegrator.class, strategy = Closure.DELEGATE_FIRST) Closure closure);

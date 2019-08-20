@@ -20,6 +20,24 @@ import com.github.noproxy.gradle.test.api.TemplateOptions
 import com.github.noproxy.gradle.test.api.template.IntegrateSpecification
 
 class ScriptTemplate {
+    static void androidApplication(IntegrateSpecification self, String applicationId) {
+        useAndroidApplicationPlugin(self)
+
+        self.buildFile {
+            append """\
+            
+            ${jcenter()}
+            ${google()}
+            
+            android {
+                defaultConfig {
+                    applicationId "$applicationId"
+                    compileSdkVersion 28
+                }
+            }"""
+        }
+    }
+
     static void androidLibrary(IntegrateSpecification self) {
         useAndroidLibraryPlugin(self)
 
@@ -67,7 +85,7 @@ class ScriptTemplate {
         }
         if (id) {
             self.buildFile {
-                append "\napply plugin: 'com.android.library'"
+                append "\napply plugin: '$id'"
             }
         }
     }
@@ -81,12 +99,18 @@ class ScriptTemplate {
      */
 
     static void useAndroidLibraryPlugin(IntegrateSpecification self, String version = TemplateOptions.getAndroidPluginVersion(), boolean apply = true) {
-        self.buildscript { google() }
+        self.buildscript {
+            google()
+            jcenter()
+        }
         usePlugin(self, apply ? 'com.android.library' : null, "com.android.tools.build:gradle:$version")
     }
 
     static void useAndroidApplicationPlugin(IntegrateSpecification self, String version = TemplateOptions.getAndroidPluginVersion(), boolean apply = true) {
-        self.buildscript { google() }
+        self.buildscript {
+            google()
+            jcenter()
+        }
         usePlugin(self, apply ? 'com.android.application' : null, "com.android.tools.build:gradle:$version")
     }
 }
