@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-package io.github.noproxy.plugin.android.publish.internal;
+package io.github.noproxy.plugin.android.publish.internal.legacy;
 
-import com.android.build.gradle.api.BaseVariant;
+import com.android.build.gradle.api.LibraryVariant;
 import com.google.common.base.Joiner;
+import io.github.noproxy.plugin.android.publish.api.AndroidVariantModuleMapping;
+import io.github.noproxy.plugin.android.publish.api.ModuleCoordinate;
 import org.gradle.api.NonNullApi;
-import org.gradle.api.artifacts.ModuleVersionIdentifier;
-import org.gradle.api.internal.artifacts.DefaultModuleVersionIdentifier;
 
 import static com.google.common.base.Strings.emptyToNull;
 
 @NonNullApi
-public class DashNamingVersionAndroidVariantCoordinateMapping implements AndroidVariantCoordinateMapping {
+public class DashNamingVersionSuffixAndroidVariantModuleMapping implements AndroidVariantModuleMapping {
     @Override
-    public ModuleVersionIdentifier getVariantCoordinate(ModuleVersionIdentifier moduleCoordinate, BaseVariant androidVariant) {
+    public void execute(ModuleCoordinate moduleCoordinate, LibraryVariant androidVariant) {
         final String baseVersion = moduleCoordinate.getVersion();
         final String flavorName = androidVariant.getFlavorName();
         final String buildTypeName = androidVariant.getBuildType().getName();
 
         final String variantVersion = Joiner.on('-').skipNulls().join(baseVersion, emptyToNull(flavorName), emptyToNull(buildTypeName));
-        return DefaultModuleVersionIdentifier.newId(moduleCoordinate.getModule(), variantVersion);
+        moduleCoordinate.setVersion(variantVersion);
     }
 }

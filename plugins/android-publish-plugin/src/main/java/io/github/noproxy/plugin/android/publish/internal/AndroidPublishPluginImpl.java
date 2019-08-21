@@ -16,122 +16,147 @@
 
 package io.github.noproxy.plugin.android.publish.internal;
 
-import com.android.build.gradle.internal.dependency.AndroidTypeAttr;
-import com.android.build.gradle.internal.publishing.AndroidArtifacts;
+import com.android.build.gradle.api.LibraryVariant;
 import com.github.noproxy.android.api.AndroidKits;
+import com.github.noproxy.android.api.AndroidProvider;
+import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
+import io.github.noproxy.plugin.android.publish.api.AndroidPublishExtension;
+import io.github.noproxy.plugin.android.publish.internal.api.ComponentWithSoftwareComponentVariant;
+import io.github.noproxy.plugin.android.publish.internal.legacy.DashNamingVersionSuffixAndroidVariantModuleMapping;
+import io.github.noproxy.plugin.android.publish.internal.legacy.DefaultModuleCoordinate;
+import org.gradle.api.Action;
+import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationVariant;
-import org.gradle.api.artifacts.ModuleVersionIdentifier;
+import org.gradle.api.artifacts.PublishArtifact;
 import org.gradle.api.component.AdhocComponentWithVariants;
+import org.gradle.api.component.ConfigurationVariantDetails;
+import org.gradle.api.component.SoftwareComponent;
 import org.gradle.api.component.SoftwareComponentFactory;
-import org.gradle.api.internal.artifacts.DefaultModuleVersionIdentifier;
 import org.gradle.api.publish.PublicationContainer;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
-import org.gradle.api.specs.Spec;
+import org.gradle.api.specs.Specs;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Optional;
 
 @SuppressWarnings("UnstableApiUsage")
 public class AndroidPublishPluginImpl {
+    private static final String LEGACY_COMPONENT_SUFFIX = "Legacy";
     private final Project project;
     private final SoftwareComponentFactory softwareComponentFactory;
     private final PublishingExtension publishing;
-    private final AndroidVariantCoordinateMapping variantCoordinateMapping = new DashNamingVersionAndroidVariantCoordinateMapping();
-    private final Spec<ConfigurationVariant> VARIANT_TYPE_SPEC = element ->
-            element.getArtifacts().stream().allMatch(artifact -> AndroidArtifacts.ArtifactType.AAR.getType().equals(artifact.getType()));
+    private final AndroidComponentsFactory components;
+    private final DefaultAndroidPublishExtension androidPublishing;
+    private final Map<SoftwareComponent, LibraryVariant> legacyPublishMap = Maps.newHashMap();
 
+    //TODO 支持增加源码等artifacts
     //TODO 我们可以将runtime和compile分离，然后实现接口实现分离
     public AndroidPublishPluginImpl(Project project, SoftwareComponentFactory softwareComponentFactory) {
         this.project = project;
         this.softwareComponentFactory = softwareComponentFactory;
         project.getPluginManager().apply(MavenPublishPlugin.class);
         publishing = project.getExtensions().getByType(PublishingExtension.class);
+        androidPublishing = (DefaultAndroidPublishExtension) project.getExtensions().create(AndroidPublishExtension.class, "androidPublishing", DefaultAndroidPublishExtension.class);
+        components = new AndroidComponentsFactory(project);
     }
 
     public void configureComponents() {
-        final AndroidLibrarySoftwareComponent androidLibrary = new AndroidLibrarySoftwareComponent();
+        final ComponentWithSoftwareComponentVariant library = components.createAndroidLibraryWithVariants("androidLibrary",
+                androidPublishing.getVariantMapping(),
+                androidPublishing.getVariantSpec());
+        project.getComponents().add(library);
 
-        AndroidKits.provider(project).getAndroidVariants().all(variant -> {
-            final AdhocComponentWithVariants variantComponent = softwareComponentFactory.adhoc(variant.getName());
-            final Configuration runtimeElements = project.getConfigurations().getByName(variant.getName() + "RuntimeElements");
-            final Configuration apiElements = project.getConfigurations().getByName(variant.getName() + "ApiElements");
+        project.afterEvaluate(ignored -> {
+            if (androidPublishing.isLegacyPublish()) {
+                final AndroidProvider provider = AndroidKits.provider(project);
+                provider.getAndroidVariants()
+                        .matching(Optional.ofNullable(androidPublishing.getVariantSpec()).orElse(Specs.satisfyAll()))
+                        .all(variant -> {
+                            final AdhocComponentWithVariants adhocComponent = softwareComponentFactory.adhoc(variant.getBaseName() + LEGACY_COMPONENT_SUFFIX);
 
-            // android仅publish了aar中的子内容，aar没有publish
-            // TODO 在consumer中，可能会因此报错： aar被transform分解后和子内容重复；如果出错就只能改为自行创建Configurations后操作。
-            apiElements.getOutgoing().artifact(variant.getPackageLibraryProvider());
-            runtimeElements.getOutgoing().artifact(variant.getPackageLibraryProvider());
-
-
-            variantComponent.addVariantsFromConfiguration(apiElements, details -> {
-                final ConfigurationVariant configurationVariant = details.getConfigurationVariant();
-                if (VARIANT_TYPE_SPEC.isSatisfiedBy(configurationVariant)) {
-                    project.getLogger().quiet("{} compile {}: {}", variant.getName(),
-//                            configurationVariant.getAttributes().getAttribute(ArtifactAttributes.ARTIFACT_FORMAT),
-                            configurationVariant.getAttributes().getAttribute(AndroidTypeAttr.ATTRIBUTE),
-//                            configurationVariant.getAttributes(),
-                            configurationVariant.getArtifacts().stream().map(publishArtifact -> publishArtifact.getName() + "." + publishArtifact.getExtension()).collect(Collectors.joining()));
-                    details.mapToMavenScope("compile");
-                } else {
-                    details.skip();
-                }
-            });
-            // 在Gradle中，每一个Configuration的outgoing可能有多个ConfigurationVariant：
-            // 如果一个Configuration里有多种不同的Artifacts， 就会产生多个ConfigurationVariant，一个ConfigurationVariant只有一个Artifact。
-            // 比如apiElements中，包含aar, classes, res等等，每一个Artifact都是一个ConfigurationVariant。
-            //
-            // 这个方法（addVariantsFromConfiguration）会把configuration本身，以及所有的ConfigurationVariant依次注册到Components中。
-            // 所有这个lambda表达式会被调用多次。
-            // 在这里，我们只想publish aar，所以任何包含非aar的ConfigurationVariant都应skip
-            variantComponent.addVariantsFromConfiguration(runtimeElements, details -> {
-                final ConfigurationVariant configurationVariant = details.getConfigurationVariant();
-                if (VARIANT_TYPE_SPEC.isSatisfiedBy(configurationVariant)) {
-                    project.getLogger().quiet("{} runtime {}: {}", variant.getName(),
-//                            configurationVariant.getAttributes().getAttribute(ArtifactAttributes.ARTIFACT_FORMAT),
-                            configurationVariant.getAttributes().getAttribute(AndroidTypeAttr.ATTRIBUTE),
-//                            configurationVariant.getAttributes(),
-                            configurationVariant.getArtifacts().stream().map(publishArtifact -> publishArtifact.getName() + "." + publishArtifact.getExtension()).collect(Collectors.joining()));
-                    details.mapToMavenScope("runtime");
-                } else {
-                    details.skip();
-                }
-            });
-
-            androidLibrary.addVariant(variantComponent, variant);
-            project.getComponents().add(variantComponent);
+                            adhocComponent.addVariantsFromConfiguration(provider.getRuntimeElements(variant), filterAarAs("runtime"));
+                            adhocComponent.addVariantsFromConfiguration(provider.getApiElements(variant), filterAarAs("compile"));
+                            legacyPublishMap.put(adhocComponent, variant);
+                            project.getComponents().add(adhocComponent);
+                        });
+            }
         });
-        project.getComponents().add(androidLibrary);
     }
 
-    public void configureAndroidLibraryPublish() {
+    private Action<ConfigurationVariantDetails> filterAarAs(final String scope) {
+        return details -> {
+            final ConfigurationVariant configurationVariant = details.getConfigurationVariant();
+            if (!configurationVariant.getArtifacts().isEmpty()) {
+                // We just use the Api/RuntimeElements to populate dependencies and will register artifacts by Publications.
+                // In most case, android registers all variant artifacts expect aar in elements. This means that the main configuration has no artifacts
+                // and the variant configurations contain android-classes, resources and so on.
+                // So we only add the empty VariantConfiguration.
+
+                if (configurationVariant.getClass().getName().endsWith("$DefaultConfigurationVariant")) {
+                    // In case, user adds new artifacts
+                    throw new AssertionError("We expects the ConfigurationVariantMapping$DefaultConfigurationVariant has no artifacts but it has "
+                            + configurationVariant.getArtifacts());
+                }
+                details.skip();
+            }
+            details.mapToMavenScope(scope);
+        };
+    }
+
+    public void configurePublications() {
         final PublicationContainer publications = publishing.getPublications();
-        final AndroidLibrarySoftwareComponent androidLibrary = (AndroidLibrarySoftwareComponent) project.getComponents().getByName("androidLibrary");
 
         // wait android variants
-        project.getPlugins().withId("com.android.library", plugin -> {
-            project.afterEvaluate(ignored -> {
-                androidLibrary.forEach((component, variant) -> publications.create(variant.getName() + "AndroidLibrary",
-                        MavenPublication.class, mavenPublication -> {
-                            mavenPublication.from(component);
-
-                            final ModuleVersionIdentifier identifier = DefaultModuleVersionIdentifier.newId(
-                                    mavenPublication.getGroupId(),
-                                    mavenPublication.getArtifactId(),
-                                    mavenPublication.getVersion()
-                            );
-                            final ModuleVersionIdentifier variantCoordinate = variantCoordinateMapping.getVariantCoordinate(identifier, variant);
-
-                            mavenPublication.setGroupId(variantCoordinate.getGroup());
-                            mavenPublication.setArtifactId(variantCoordinate.getName());
-                            mavenPublication.setVersion(variantCoordinate.getVersion());
-                        }));
-                publications.create("androidLibrary", MavenPublication.class, mavenPublication -> {
-                    // SoftwareComponent只包含依赖，依赖管理，产物
-                    mavenPublication.from(androidLibrary);
-                });
+        AndroidKits.afterAndroidEvaluate(project, basePlugin -> {
+            publications.create("androidLibrary", MavenPublication.class, publication -> {
+                publication.from(project.getComponents().findByName("androidLibrary"));
+                Optional.ofNullable(getCompatibleArtifact()).ifPresent(publication::artifact);
             });
+
+            project.getComponents().withType(AdhocComponentWithVariants.class)
+                    .matching(component -> component.getName().endsWith(LEGACY_COMPONENT_SUFFIX))
+                    .all(component -> publications.create(component.getName(), MavenPublication.class, publication -> {
+                        publication.from(component);
+                        final LibraryVariant variant = legacyPublishMap.get(component);
+                        if (variant == null) {
+                            throw new AssertionError("Cannot find variant by component: " + component);
+                        }
+                        publication.artifact(components.createArtifact(variant.getPackageLibraryProvider()));
+
+                        final DefaultModuleCoordinate coordinate = new DefaultModuleCoordinate(publication.getGroupId(), publication.getArtifactId(), publication.getVersion());
+                        Optional.ofNullable(androidPublishing.getLegacyVariantMapping()).orElseGet(DashNamingVersionSuffixAndroidVariantModuleMapping::new)
+                                .execute(coordinate, variant);
+
+                        publication.setGroupId(coordinate.getGroupId());
+                        publication.setArtifactId(coordinate.getArtifactId());
+                        publication.setVersion(coordinate.getVersion());
+                    }));
         });
+    }
+
+    @Nullable
+    private PublishArtifact getCompatibleArtifact() {
+        final String compatiblePublishConfig = androidPublishing.getCompatiblePublishConfig();
+        if (Strings.isNullOrEmpty(compatiblePublishConfig)) {
+            return null;
+        }
+        final LibraryVariant mainVariant = AndroidKits.provider(project).getAndroidVariants().findByName(compatiblePublishConfig);
+        if (mainVariant != null) {
+            return components.createArtifact(mainVariant.getPackageLibraryProvider());
+        } else {
+            return components.createArtifact(project.provider(() -> {
+                if (compatiblePublishConfig.equals(AndroidPublishExtension.DEFAULT_COMPATIBLE_PUBLISH_CONFIG)) {
+                    throw new InvalidUserDataException(
+                            String.format("Cannot find the configuration as compatiblePublishConfig '%s'. If you don't want to publish compatible artifact, you can set 'compatiblePublishConfig = null' to disable this feature.", compatiblePublishConfig));
+                }
+                throw new InvalidUserDataException(
+                        String.format("Cannot find the configuration as compatiblePublishConfig '%s'", compatiblePublishConfig));
+            }));
+        }
     }
 }

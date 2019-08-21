@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package com.github.noproxy.android.api;
+package io.github.noproxy.plugin.android.publish.api;
 
-import com.android.build.gradle.api.BaseVariant;
-import com.android.build.gradle.api.LibraryVariant;
-import org.gradle.api.NamedDomainObjectContainer;
-import org.gradle.api.artifacts.Configuration;
+public interface ModuleCoordinate {
+    String getVersion();
 
-public interface AndroidProvider {
-    NamedDomainObjectContainer<LibraryVariant> getAndroidVariants();
+    void setVersion(String version);
 
-    Configuration getApiElements(BaseVariant variant);
+    String getGroupId();
 
-    Configuration getRuntimeElements(BaseVariant variant);
+    void setGroupId(String groupId);
+
+    String getArtifactId();
+
+    void setArtifactId(String artifactId);
 }

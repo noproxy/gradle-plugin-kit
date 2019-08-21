@@ -37,6 +37,6 @@ public class AndroidPublishPlugin implements Plugin<Project> {
     public void apply(@NotNull Project project) {
         final AndroidPublishPluginImpl androidPublishPlugin = new AndroidPublishPluginImpl(project, softwareComponentFactory);
         androidPublishPlugin.configureComponents();
-        androidPublishPlugin.configureAndroidLibraryPublish();
+        androidPublishPlugin.configurePublications();
     }
 }

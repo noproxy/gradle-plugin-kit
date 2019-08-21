@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package io.github.noproxy.plugin.android.publish.internal;
+package io.github.noproxy.plugin.android.publish.api;
 
-import com.android.build.gradle.api.BaseVariant;
+import com.android.build.gradle.api.LibraryVariant;
 import org.gradle.api.NonNullApi;
-import org.gradle.api.artifacts.ModuleVersionIdentifier;
 
 @NonNullApi
-public interface AndroidVariantCoordinateMapping {
-    ModuleVersionIdentifier getVariantCoordinate(ModuleVersionIdentifier moduleCoordinate, BaseVariant androidVariant);
+public interface AndroidVariantModuleMapping {
+    void execute(ModuleCoordinate moduleCoordinate, LibraryVariant androidVariant);
 }

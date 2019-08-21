@@ -18,11 +18,13 @@ package com.github.noproxy.android.internal;
 
 import com.android.build.gradle.LibraryExtension;
 import com.android.build.gradle.LibraryPlugin;
+import com.android.build.gradle.api.BaseVariant;
 import com.android.build.gradle.api.LibraryVariant;
 import com.github.noproxy.android.api.AndroidProvider;
 import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.NonNullApi;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.Configuration;
 
 @NonNullApi
 public class DefaultAndroidProvider implements AndroidProvider {
@@ -38,5 +40,15 @@ public class DefaultAndroidProvider implements AndroidProvider {
         project.getPlugins().withId("com.android.library", plugin ->
                 ((LibraryExtension) ((LibraryPlugin) plugin).getExtension()).getLibraryVariants().all(variants::add));
         return variants;
+    }
+
+    @Override
+    public Configuration getApiElements(BaseVariant androidVariant) {
+        return project.getConfigurations().getByName(androidVariant.getName() + "ApiElements");
+    }
+
+    @Override
+    public Configuration getRuntimeElements(BaseVariant androidVariant) {
+        return project.getConfigurations().getByName(androidVariant.getName() + "RuntimeElements");
     }
 }

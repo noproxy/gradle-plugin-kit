@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
-package com.github.noproxy.android.api;
+package io.github.noproxy.plugin.android.publish.internal.api;
 
-import com.android.build.gradle.api.BaseVariant;
-import com.android.build.gradle.api.LibraryVariant;
-import org.gradle.api.NamedDomainObjectContainer;
-import org.gradle.api.artifacts.Configuration;
+import io.github.noproxy.plugin.android.publish.api.ScopeMapping;
+import org.gradle.api.component.SoftwareComponentVariant;
 
-public interface AndroidProvider {
-    NamedDomainObjectContainer<LibraryVariant> getAndroidVariants();
-
-    Configuration getApiElements(BaseVariant variant);
-
-    Configuration getRuntimeElements(BaseVariant variant);
+public interface MavenAwareSoftwareComponentVariant extends SoftwareComponentVariant {
+    ScopeMapping getScopeMapping();
 }

@@ -16,11 +16,30 @@
 
 package com.github.noproxy.android.api;
 
+import com.android.build.gradle.AppPlugin;
+import com.android.build.gradle.BasePlugin;
+import com.android.build.gradle.LibraryPlugin;
 import com.github.noproxy.android.internal.DefaultAndroidProvider;
+import org.gradle.api.Action;
 import org.gradle.api.Project;
 
 public class AndroidKits {
     public static AndroidProvider provider(Project project) {
         return new DefaultAndroidProvider(project);
+    }
+
+    public static void withAppPlugin(Project project, Action<AppPlugin> action) {
+        //noinspection unchecked
+        project.getPlugins().withId("com.android.application", (Action) action);
+    }
+
+    public static void withLibraryPlugin(Project project, Action<LibraryPlugin> action) {
+        //noinspection unchecked
+        project.getPlugins().withId("com.android.library", (Action) action);
+    }
+
+    public static void afterAndroidEvaluate(Project project, Action<BasePlugin> action) {
+        withAppPlugin(project, plugin -> project.afterEvaluate(ignored -> action.execute(plugin)));
+        withLibraryPlugin(project, plugin -> project.afterEvaluate(ignored -> action.execute(plugin)));
     }
 }
