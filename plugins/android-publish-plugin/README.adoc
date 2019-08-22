@@ -1,0 +1,194 @@
+= Android Publish Plugin
+
+:metadata: link:https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=2ahUKEwih_KPy3ZXkAhWGfXAKHWdvD_oQFjAAegQIABAB&url=https%3A%2F%2Fblog.gradle.org%2Fgradle-metadata-1.0&usg=AOvVaw3P8LFdIfuaGWoOmJUTihCO[Gradle Module Metadata]
+
+A plugin to publish all variants of android library(aka, all build types and product flavors) to maven repository.
+
+This plugin takes the advantages of {metadata} to publish every variants into one Maven Library.
+And it also provides the legacy way to publish without Gradle Module Metadata.
+
+== About Variants-aware Publishing
+
+Android Plugin for Gradle introduced __variant-aware dependencies resolving__ based on Gradle's link:https://docs.gradle.org/current/userguide/dependency_management_attribute_based_matching.html[Attribute based matching in dependency resolution] since 3.0.0 (android plugin).
+And then gradle continued to explore a way to make the new mechanism working with Maven Repository.
+Finally, the answer is {metadata} and it reached 1.0 in Gradle 5.3.
+
+Google is often slow to react somethings.
+They just finished supporting the link:https://docs.gradle.org/current/userguide/publishing_overview.html#publishing_overview[new publish plugins] (link:https://issuetracker.google.com/issues/37055147[ISSUE: Support maven-publish plugin]).
+It takes 3 years from issue creating to working on the development.
+If you just want to use the new publish plugin and publish only one variant, the official support is coming in link:https://issuetracker.google.com/issues/37055147#comment20[Android Plugin 3.6 canary 8].
+
+As for publishing all variants with {metadata}, it has not started yet but you can track it at link:https://issuetracker.google.com/issues/136309578[ISSUE: Support for variant aware publishing with Gradle metadata].
+
+This plugin provides two ways to publish all variants.
+
+=== Gradle Module Metadata
+
+All variants will be publish in one maven module.
+Given the library ``org.example:library:1.0.0``, the published file tree is like this.
+
+[source]
+.File tree in maven repository
+----
+org.example
+    |- library
+        |- 1.0.0
+            |- library-1.0.0.pom            <1>
+            |- library-1.0.0.module         <2>
+            |- library-1.0.0-debugFlavor1Runtime.aar <3>
+            |- library-1.0.0-debugFlavor1Api.aar
+            |- library-1.0.0-debugFlavor2Runtime.aar
+            |- library-1.0.0-debugFlavor2Api.aar
+            |- library-1.0.0-releaseFlavor1Runtime.aar
+            |- library-1.0.0-releaseFlavor1Api.aar
+            |- library-1.0.0-releaseFlavor1Runtime.aar
+            |- library-1.0.0-releaseFlavor1Api.aar
+----
+<1> The gradle module metadata.
+It contains variants information, including dependencies of every variant.
+<2> The empty maven pom metadata.
+It only contains a specially mark and the pom necessary attributes.
+<3> All the files named ``library-1.0.0-${variantName}${Scope}.aar`` are the files of variants.
+And in normal case, it's named like ``${buildType}${FlavorsName}`` according to your project configuration.
+The `scope` (may be `runtime` or `api` ) is defined by maven and it works with the
+`implementation` and `api` configuration in Gradle.
+
+[NOTE]
+The checksum files (.md5,.sh1) are left out.
+
+When consumed, the variants will fit into the consumer's variants.
+This means the `debugFlavor1RuntimeClasspath` of the consumer will consume the file named `library-1.0.0-debugFlavor1Runtime` and transitively depend on the dependencies of the configuration which built the variant file.
+
+==== Compatible Old Gradle Build
+
+Gradle consumes the module metadata by default since 5.3.
+If some consumer is built with previous version, gradle will **silently** fail resolving the files in the module with {metadata} because it thinks this is an empty module.
+
+For compatible, this plugin also provides the ability to publish an addition file as fallback for old gradle build.
+In this mode, the published files is like this:
+
+[source]
+.File tree in maven repository
+----
+org.example
+    |- library
+        |- 1.0.0
+            |- library-1.0.0.aar            <1>
+            |- library-1.0.0.pom            <2>
+            |- library-1.0.0.module
+            |- library-1.0.0-debugFlavor1Runtime.aar
+            |- library-1.0.0-debugFlavor1Api.aar
+            |- library-1.0.0-debugFlavor2Runtime.aar
+            |- library-1.0.0-debugFlavor2Api.aar
+            |- library-1.0.0-releaseFlavor1Runtime.aar
+            |- library-1.0.0-releaseFlavor1Api.aar
+            |- library-1.0.0-releaseFlavor1Runtime.aar
+            |- library-1.0.0-releaseFlavor1Api.aar
+----
+<1> An fallback file for old gradle build
+<2> The maven pom file contains the dependencies of the fallback file
+
+=== Legacy Publishing with Version Suffix
+
+If you don't want to use the new {metadata}, you can still use the version suffix to publish all variants.
+As the result, each variant will produce an maven module.
+It looks like:
+
+[source]
+.File tree in maven repository
+----
+org.example
+    |- library
+        |- 1.0.0-debugFlavor1
+            |- library-1.0.0-debugFlavor1.aar
+            |- library-1.0.0-debugFlavor1.pom
+        |- 1.0.0-debugFlavor2
+            |- library-1.0.0-debugFlavor2.aar
+            |- library-1.0.0-debugFlavor2.pom
+        |- 1.0.0-releaseFlavor1
+            |- library-1.0.0-releaseFlavor1.aar
+            |- library-1.0.0-releaseFlavor1.pom
+        |- 1.0.0-releaseFlavor2
+            |- library-1.0.0-releaseFlavor2.aar
+            |- library-1.0.0-releaseFlavor2.pom
+----
+
+It works but you will have pain in declaring dependencies in consumer project.
+
+[source,groovy]
+.consumer's build.gradle
+----
+dependencies {
+    debugFlavor1Implementation 'org.example:library:1.0.0-debugFlavor1'
+    debugFlavor2Implementation 'org.example:library:1.0.0-debugFlavor2'
+    releaseFlavor1Implementation 'org.example:library:1.0.0-releaseFlavor1'
+    releaseFlavor2Implementation 'org.example:library:1.0.0-releaseFlavor2'
+}
+----
+
+== Usage
+
+=== Declare plugin
+
+[source,groovy]
+.build.gradle
+----
+plugins {
+    id 'io.github.noproxy.android-publish-plugin'
+}
+
+apply plugin: 'com.android.library'
+
+publishing {
+    repositories {
+        maven {...}
+    }
+}
+----
+
+=== Configure
+
+[source,groovy]
+.build.gradle
+----
+androidPublishing {
+    // false by default
+    legacyPublish = true                       <1>
+    // 'release' by default
+    compatiblePublishConfig = 'releaseFlavor1'  <2>
+    // a closure return boolean
+    filterVariants {                            <3>
+        buildType.name != 'dev'
+    }
+}
+----
+<1> set whether enable the legacy variants-aware publishing;
+<2> to set which variant as compatible when publishing by gradle module metadata;
+<3> to filter variants to publish.
+Return false, if you want to disable the publishing of this variant.
+
+=== Custom Published Artifacts Naming
+
+By default, the aar of variant ``buildFlavor1`` will be published as `library-1.0.0-buildFlavor1Runtime.aar` and `library-1.0.0-buildFlavor1Api.aar`.
+The variant name and scope becomes the `classifier` of the artifact.
+You can change it by configuring.
+
+[source,groovy]
+.build.gradle
+----
+androidPublishing {
+    mapVariant { variant, scopeMapping ->
+        // can be one of 'runtime', 'compile', 'runtime_optional', 'compile_optional'
+        String scope = scopeMapping.name
+        String buildTypeName = variant.buildType.name // 'debug', 'release'
+        String flavorName = variant.flavorName // 'Flavor1'
+
+        // You can change the final classifier and extension
+        // Any other changes is ignored
+        classifier = "$buildTypeName-$flavorName-$scope"
+        // extension = "$buildTypeName-$flavorName-$scope"
+    }
+}
+----
+
+
