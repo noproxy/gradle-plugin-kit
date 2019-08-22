@@ -1,6 +1,6 @@
 = Android Publish Plugin
 
-:metadata: link:https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=2ahUKEwih_KPy3ZXkAhWGfXAKHWdvD_oQFjAAegQIABAB&url=https%3A%2F%2Fblog.gradle.org%2Fgradle-metadata-1.0&usg=AOvVaw3P8LFdIfuaGWoOmJUTihCO[Gradle Module Metadata]
+:metadata: link:https://blog.gradle.org/gradle-metadata-1.0[Gradle Module Metadata]
 
 A plugin to publish all variants of android library(aka, all build types and product flavors) to maven repository.
 
