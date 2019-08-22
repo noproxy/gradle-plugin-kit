@@ -59,7 +59,7 @@ The checksum files (.md5,.sh1) are left out.
 When consumed, the variants will fit into the consumer's variants.
 This means the `debugFlavor1RuntimeClasspath` of the consumer will consume the file named `library-1.0.0-debugFlavor1Runtime` and transitively depend on the dependencies of the configuration which built the variant file.
 
-==== Compatible Old Gradle Build
+==== Compatible with Old Gradle Build
 
 Gradle consumes the module metadata by default since 5.3.
 If some consumer is built with previous version, gradle will **silently** fail resolving the files in the module with {metadata} because it thinks this is an empty module.
@@ -134,7 +134,7 @@ dependencies {
 .build.gradle
 ----
 plugins {
-    id 'io.github.noproxy.android-publish-plugin'
+    id 'io.github.noproxy.android-publish-plugin', version '0.0.1'
 }
 
 apply plugin: 'com.android.library'
