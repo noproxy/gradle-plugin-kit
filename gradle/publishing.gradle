@@ -1,3 +1,5 @@
+import org.codehaus.groovy.runtime.InvokerHelper
+
 /*
  * Copyright 2019 the original author or authors.
  *
@@ -86,13 +88,14 @@ publishing {
 
 }
 
+// publish files to github release
 apply plugin: "com.github.breadmoirai.github-release"
 
 githubRelease {
     if (project.hasProperty('github.publish.token')) {
         token getProperty('github.publish.token')
     } else {
-        logger.warn("set 'github.publish.token' in gradle.properties to publish github releases")
+        logger.warn("Please set 'github.publish.token' in gradle.properties to publish github releases")
     }
     repo project.name
     draft byProperty("draft")
@@ -110,6 +113,40 @@ def isPreRelease() {
 def byProperty(String key, boolean defaultValue = true) {
     def value = properties.getOrDefault(key, defaultValue)
     return Boolean.parseBoolean(value.toString())
+}
+// publish maven to github package registry
+//     classpath "io.freefair.gradle:github-plugin:4.1.0"
+apply plugin: "io.freefair.github.package-registry-maven-publish"
+
+class Property {
+    static void mapTo(Object extension, Map<String, String> values, String actionMessage = '') {
+        values.each { key, value ->
+            mapTo(extension, actionMessage, key, value)
+        }
+    }
+
+    static boolean mapTo(Object extension, String actionMessage = '', String extensionPropertyName, String... projectPropertyNames) {
+        assert projectPropertyNames.size() > 0
+        Project project = extension.project
+        for (projectPropertyName in projectPropertyNames) {
+            if (project.hasProperty(projectPropertyName)) {
+                InvokerHelper.setProperty(extension, extensionPropertyName, project.property(projectPropertyName))
+                return true
+            }
+        }
+
+        project.logger.warn("Please set '{}' in gradle.properties {}", projectPropertyNames[0], actionMessage)
+        return false
+    }
+}
+
+github {
+    use(Property) {
+        mapTo('to publish as github release', 'username', 'github.user', 'github.username')
+        mapTo('to publish as github release', 'token', 'github.registry.token', 'github.publish.token')
+    }
+    tag = 'HEAD'
+    travis = true
 }
 
 /*
