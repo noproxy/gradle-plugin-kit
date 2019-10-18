@@ -1,0 +1,22 @@
+= Android Consumer Proguard Filtering Plugin
+
+A plugin to filter consumer proguard rules for Android Project. You can exclude proguard rules from external maven module.
+
+== Usage
+
+[source,groovy]
+.build.gradle
+----
+plugins {
+    id 'io.github.noproxy.android-consumer-proguard-filtering-plugin', version '0.0.1'
+}
+
+apply plugin: 'com.android.application'
+
+android {
+    consumerProguardRules {
+        exclude group: 'org.example'
+        exclude group: 'com.android.support', module: 'support-v4'
+    }
+}
+----
