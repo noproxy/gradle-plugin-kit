@@ -70,11 +70,11 @@ import java.util.function.Predicate;
  * }]</pre></dd>
  * </dl>
  *
- * @implNote <ol>
+ * Note:
+ * <ol>
  * <li>MavenPublishPlugin assumes any component is {@link SoftwareComponentInternal} and reads {@link SoftwareComponentVariant} by {@link SoftwareComponentInternal#getUsages()};</li>
  * <li>Gradle module metadata feature will be activated if type is {@link ComponentWithVariants}.</li>
  * </ol>
- * @see DefaultMavenPublication#from(org.gradle.api.component.SoftwareComponent
  */
 public class DefaultComponentWithSoftwareComponentVariant implements
         ComponentWithVariants,

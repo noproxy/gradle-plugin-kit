@@ -29,7 +29,7 @@ public interface AndroidVariantArtifactMapping {
      * @param artifact       to configure
      * @param androidVariant of the artifact
      * @param scopeMapping   of the artifact
-     * @implNote You can change only the extension and classifier. Changing other properties of artifacts makes no differences.
+     * Note: You can change only the extension and classifier. Changing other properties of artifacts makes no differences.
      */
     void execute(ConfigurablePublishArtifact artifact, LibraryVariant androidVariant, ScopeMapping scopeMapping);
 
