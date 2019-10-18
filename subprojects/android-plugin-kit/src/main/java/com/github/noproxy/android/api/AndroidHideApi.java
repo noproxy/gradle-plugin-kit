@@ -16,5 +16,23 @@
 
 package com.github.noproxy.android.api;
 
+import com.android.build.gradle.api.BaseVariant;
+import com.android.build.gradle.internal.VariantManager;
+import com.android.build.gradle.internal.scope.CodeShrinker;
+import com.android.build.gradle.internal.scope.GlobalScope;
+import com.android.build.gradle.internal.scope.VariantScope;
+import com.android.build.gradle.internal.variant.BaseVariantData;
+
 public interface AndroidHideApi {
+    BaseVariantData getVariantData(BaseVariant variant);
+
+    GlobalScope getGlobalScope();
+
+    VariantManager getVariantManager();
+
+    VariantScope getVariantScope(BaseVariant variant);
+
+    boolean isCodeShrinkerEnable(BaseVariant variant);
+
+    CodeShrinker getCodeShrinker(BaseVariant variant);
 }

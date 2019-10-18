@@ -17,7 +17,7 @@
 package com.github.noproxy.gradle.test.api;
 
 public class TemplateOptions {
-    private static final String DEFAULT_ANDROID_PLUGIN_VERSION = "3.4.2";
+    private static final String DEFAULT_ANDROID_PLUGIN_VERSION = "3.3.2";
 
     public static String getAndroidPluginVersion() {
         return System.getProperty("noproxy.template.androidPluginVersion", DEFAULT_ANDROID_PLUGIN_VERSION);
