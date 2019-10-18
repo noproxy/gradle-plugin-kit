@@ -51,7 +51,7 @@ githubRelease {
 
 gradlePlugin {
     plugins {
-        androidPublishPlugin {
+        androidConsumerProguardFilteringPlugin {
             id = "${group}.${project.name}"
             implementationClass = "io.github.noproxy.plugin.android.ConsumerProguardFilteringPlugin"
         }
@@ -65,7 +65,7 @@ pluginBundle {
     tags = ["android", "proguard"]
 
     plugins {
-        androidPluginKitPlugin {
+        androidConsumerProguardFilteringPlugin {
             displayName = "Android Consumer Proguard Rules Filtering Plugin"
         }
     }
