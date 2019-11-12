@@ -30,7 +30,7 @@ class CheckManifestSpec extends InitScriptIntegrateSpecification {
 
         then:
         success()
-        output.contains("init script 'checkManifest.gradle' applied. version: 0")
+        output.contains("init script 'checkManifest.gradle' applied. version: ")
     }
 
     def "android project without network traffic attribute will break"() {
@@ -56,7 +56,7 @@ class CheckManifestSpec extends InitScriptIntegrateSpecification {
         then:
         fail()
         taskRun('processDebugManifest')
-        output.contains("AssertionError: AndroidManifest.xml must explicitly declare 'usesCleartextTraffic' attribute.")
+        output.contains("AssertionError: AndroidManifest.xml must explicitly declare 'usesCleartextTraffic' attribute if target sdk > 28.")
     }
 
     def "android project with android:usesCleartextTraffic attribute will pass"() {

@@ -29,9 +29,9 @@ initscript {
         jcenter()
     }
     dependencies {
-        classpath "io.github.noproxy:init-scripts:0.0.1"
+        classpath "io.github.noproxy:init-scripts:0.0.2"
     }
 }
 
-logger.quiet("init script 'checkManifest.gradle' applied. version: 0.0.1")
+logger.quiet("init script 'checkManifest.gradle' applied. version: 0.0.2")
 apply plugin: Class.forName('io.github.noproxy.init.CheckManifestPlugin')

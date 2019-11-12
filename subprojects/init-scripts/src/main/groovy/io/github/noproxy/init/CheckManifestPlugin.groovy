@@ -127,7 +127,8 @@ class CheckManifestPlugin implements Plugin<Gradle> {
                                     return
                                 }
 
-                                throw new AssertionError("AndroidManifest.xml must explicitly declare 'usesCleartextTraffic' attribute.")
+                                throw new AssertionError("AndroidManifest.xml must explicitly declare 'usesCleartextTraffic' attribute if target sdk > 28. \n" +
+                                        "Target sdk > 28时，http连接会被禁止，除非在AndroidManifest.xml中设定android:usesCleartextTraffic=\"true\"。\n 详情参考: https://developer.android.com/training/articles/security-config#base-config")
                             }
                         }
                     }

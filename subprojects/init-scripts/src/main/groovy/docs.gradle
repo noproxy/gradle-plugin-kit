@@ -37,6 +37,7 @@ settingsEvaluated { Settings settings ->
 
         project.task('initDocs') {
             doLast {
+                setupTemplate(new File(gitRoot))
                 setupGitlabCI(new File(gitRoot))
             }
         }
@@ -130,7 +131,7 @@ settingsEvaluated { Settings settings ->
 def setupGitlabCI(File rootDir) {
     def target = new File(rootDir, '.gitlab-ci.yml')
     if (target.exists()) {
-        logger.warn("skip create .gitlab-ci.yml because it exist!")
+        logger.warn("skip create .gitlab-ci.yml because it exists!")
         return
     }
     logger.quiet("create .gitlab-ci.yml at {}", target.path)
@@ -169,4 +170,14 @@ pages:
     - master"""
 }
 
+def setupTemplate(File rootDir) {
+    def docsDir = new File(rootDir, 'docs')
+    if (docsDir.exists()) {
+        logger.warn("skip generate docs template because folder '$docsDir' exists!")
+        return
+    }
+    logger.quiet("create docs template at {}", docsDir.path)
+    docsDir.mkdirs()
 
+
+}
