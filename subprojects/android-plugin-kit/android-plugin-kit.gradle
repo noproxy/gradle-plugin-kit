@@ -51,7 +51,9 @@ apply from: rootProject.file("gradle/publishing.gradle")
 
 publishing {
     publications {
-        androidPluginKit(MavenPublication)
+        androidPluginKit(MavenPublication) {
+            from components.java
+        }
     }
 }
 

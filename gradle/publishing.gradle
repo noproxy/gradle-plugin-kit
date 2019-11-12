@@ -80,10 +80,6 @@ publishing {
         artifact(tasks.getByName("groovydocJar"))
         artifact(tasks.getByName("javadocJar"))
         artifact(tasks.getByName("sourcesJar"))
-
-        if (name != "pluginMaven") {
-            artifact(tasks.getByName("jar"))
-        }
     }
 
 }
@@ -155,7 +151,9 @@ Usage:
 // register any publication to publish to maven repository
 publishing {
     publications {
-        lib(MavenPublication)
+        lib(MavenPublication) {
+            from components.java
+        }
     }
 }
 
