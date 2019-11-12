@@ -16,17 +16,57 @@
 
 plugins {
     id 'groovy'
+    // for use test kit classpath in integrating test
+    id 'java-gradle-plugin'
+}
+
+repositories {
+    google()
 }
 
 apply from: rootProject.file('gradle/test_plugin.gradle')
 
 dependencies {
     integrationTestImplementation localGroovy()
-    implementation("org.jetbrains:annotations:13.0")
+    implementation gradleApi()
+    compile 'com.android.tools.build:gradle:3.1.4'
+    compile 'commons-io:commons-io:2.6'
+    compile 'org.jetbrains:annotations:13.0'
 }
 
 tasks.withType(Test) {
     // Used by init script integrating test. See also:
     // init-scripts/src/test/groovy/com/noproxy/github/init/InitScriptIntegrateSpecification.groovy
-    systemProperty('noproxy.script.home', file('src/main/groovy').absolutePath);
+    systemProperty('noproxy.script.home', file('src/main/groovy').absolutePath)
+}
+afterEvaluate {
+    tasks.named("integrationTest").configure {
+        dependsOn tasks.named("publishInitScriptClasspathPublicationToMavenLocal")
+    }
+}
+
+assert ("io.github.noproxy" == group)
+assert ("init-scripts" == name)
+version = "0.0.1"
+
+apply from: rootProject.file("gradle/publishing.gradle")
+
+
+
+publishing {
+    publications {
+        initScriptClasspath(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            name = "xal"
+            url = 'http://10.10.40.12:16666/nexus/content/repositories/android-xal-releases/'
+            credentials {
+                username = MAVEN_USERNAME
+                password = MAVEN_PASSWORD
+            }
+        }
+    }
 }
