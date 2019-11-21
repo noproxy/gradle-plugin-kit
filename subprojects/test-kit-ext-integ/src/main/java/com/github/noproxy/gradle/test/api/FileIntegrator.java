@@ -33,6 +33,8 @@ public interface FileIntegrator extends Closeable, Integrator {
         return Joiner.on(File.separator).join(paths);
     }
 
+    void reset();
+
     File file(String path);
 
     File file(String path, Action<File> fileAction);

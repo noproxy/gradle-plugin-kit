@@ -20,6 +20,7 @@ import com.github.noproxy.gradle.test.api.FileIntegrator;
 import com.github.noproxy.gradle.test.api.ZipIntegrator;
 import com.google.common.collect.Sets;
 import groovy.lang.Closure;
+import org.apache.commons.io.FileUtils;
 import org.gradle.api.Action;
 import org.gradle.api.NonNullApi;
 import org.jetbrains.annotations.Nullable;
@@ -27,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Set;
 
 @NonNullApi
@@ -44,6 +46,13 @@ public class DefaultFileIntegrator implements FileIntegrator, FileIntegratorInte
     DefaultFileIntegrator(File root, FileIntegrator parent) {
         this.root = root;
         this.parent = (FileIntegratorInternal) parent;
+    }
+
+    @Override
+    public void reset() {
+        for (File child : Objects.requireNonNull(root.listFiles())) {
+            FileUtils.deleteQuietly(child);
+        }
     }
 
     @Override
