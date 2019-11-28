@@ -29,10 +29,10 @@ initscript {
         jcenter()
     }
     dependencies {
-        classpath "io.github.noproxy:init-scripts:0.0.2"
+        classpath "io.github.noproxy:init-scripts:0.0.3"
     }
 }
 
-logger.quiet("init script 'io.github.noproxy:init-scripts applied. version: 0.0.2")
+logger.quiet("init script 'io.github.noproxy:init-scripts applied. version: 0.0.3")
 apply plugin: Class.forName('io.github.noproxy.init.CheckManifestPlugin')
 apply plugin: Class.forName('io.github.noproxy.init.JniLibsNotStrippedPlugin')

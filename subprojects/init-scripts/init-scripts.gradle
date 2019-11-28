@@ -36,7 +36,7 @@ dependencies {
 
 assert ("io.github.noproxy" == group)
 assert ("init-scripts" == name)
-version = "0.0.2"
+version = "0.0.3"
 
 apply from: rootProject.file("gradle/publishing.gradle")
 
