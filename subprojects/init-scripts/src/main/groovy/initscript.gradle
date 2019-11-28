@@ -33,5 +33,6 @@ initscript {
     }
 }
 
-logger.quiet("init script 'checkManifest.gradle' applied. version: 0.0.2")
+logger.quiet("init script 'io.github.noproxy:init-scripts applied. version: 0.0.2")
 apply plugin: Class.forName('io.github.noproxy.init.CheckManifestPlugin')
+apply plugin: Class.forName('io.github.noproxy.init.JniLibsNotStrippedPlugin')
