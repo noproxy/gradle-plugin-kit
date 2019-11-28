@@ -39,6 +39,7 @@ import java.util.stream.Collectors
  */
 
 
+@SuppressWarnings("unused")
 class CheckManifestPlugin implements Plugin<Gradle> {
     final IOFileFilter manifestFilter = new NameFileFilter("AndroidManifest.xml");
 

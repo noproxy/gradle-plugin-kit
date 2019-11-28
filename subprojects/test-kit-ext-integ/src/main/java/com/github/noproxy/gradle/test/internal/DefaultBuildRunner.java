@@ -84,7 +84,6 @@ public class DefaultBuildRunner implements BuildRunner {
     @Closer
     @Override
     public void run(String... arguments) {
-        integrator.reset();
         Actions.close().execute(integrator);
 
         // clean

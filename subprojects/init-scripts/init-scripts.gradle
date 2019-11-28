@@ -34,24 +34,11 @@ dependencies {
     compile 'org.jetbrains:annotations:13.0'
 }
 
-tasks.withType(Test) {
-    // Used by init script integrating test. See also:
-    // init-scripts/src/test/groovy/com/noproxy/github/init/InitScriptIntegrateSpecification.groovy
-    systemProperty('noproxy.script.home', file('src/main/groovy').absolutePath)
-}
-afterEvaluate {
-    tasks.named("integrationTest").configure {
-        dependsOn tasks.named("publishInitScriptClasspathPublicationToMavenLocal")
-    }
-}
-
 assert ("io.github.noproxy" == group)
 assert ("init-scripts" == name)
 version = "0.0.2"
 
 apply from: rootProject.file("gradle/publishing.gradle")
-
-
 
 publishing {
     publications {
@@ -67,6 +54,26 @@ publishing {
                 username = MAVEN_USERNAME
                 password = MAVEN_PASSWORD
             }
+        }
+        maven {
+            name = "test"
+            url = 'build/tmp/test_repo'
+        }
+    }
+}
+
+afterEvaluate {
+    tasks.withType(Test) {
+        // Used by init script integrating test. See also:
+        // init-scripts/src/test/groovy/com/noproxy/github/init/InitScriptIntegrateSpecification.groovy
+        systemProperty('noproxy.script.home', file('src/main/groovy').absolutePath)
+    }
+    tasks.named("integrationTest").configure {
+        dependsOn tasks.named("publishInitScriptClasspathPublicationToTestRepository")
+    }
+    tasks.named("publishInitScriptClasspathPublicationToTestRepository").configure {
+        doFirst {
+            file('build/tmp/test_repo').deleteDir()
         }
     }
 }
