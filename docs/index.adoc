@@ -1,0 +1,47 @@
+= CI公共库工具使用
+
+== 功能介绍
+
+.Checkstyle支持
+. 现在CI会自动用我们准备的checkstyle默认配置，在你每次push代码到Git时，自动为生成一个checkstyle的报告，并在CI上展示;
+. (可选)如果你想更改checkstyle配置，你可以使用本文提供的CLI工具中的 `checkstyle initCheckstyle` 命令，给你的项目生成checkstyle配置文件。修改完配置后，将生成的文件一同提交到Git仓库，以后CI将为以你自行设定的配置为准;
+. (可选)如果你想要在本地生成checkstyle报告，你可以使用本文提供的CLI工具中的 `checkstyles` 命令立即生成报告。
+
+.Spotbug支持
+. 现在CI会自动在你每次push代码到Git时，自动使用Spotbug对你的代码进行静态检查，并将结果在CI上展示;
+. (可选)如果你想要在本地生成spotbug报告，你可以使用本文提供的CLI工具中的 `spotbugs` 命令立即生成报告。
+
+.文档生成支持
+. (必须)你需要使用本文提供的CLI工具中的 `doc :initDocs` 命令生成配置文件和模版文档（在docs目录下，格式为asciidoc）
+. 此后，在你每次psuh代码到Gitlab时，Gitlab会自动将你的docs下的文档生成一个静态网站，并且发布在 `http://${用户名/用户组名}.pages.${Gitlab的host}/${项目名}/`。
+
+== 安装CLI工具
+
+使用下面命令，就能成功安装CLI工具。
+
+[source,bash]
+----
+curl -fsSL https://git.io/fj54t | sh
+----
+
+安装后也会在控制台输出使用方法。
+
+== 使用方法
+
+=== 全局功能
+
+update_ci_utils:: 更新CLI工具
+
+==== Gradle项目功能
+
+[NOTE]
+----
+必须在Gradle项目的根目录使用
+----
+
+checkstyles::                   生成checkstyle报告
+spotbugs::                      生成spotbug报告
+docs::                          生成项目文档网页
+
+checkstyle initCheckstyle::     在当前项目创建checkstyle配置文件，仅首次使用
+doc [big red yellow-background]**:**initDocs::                 在当前项目创建文档模版，仅首次使用。[big red yellow-background]**注意命令中包含一个冒号！**
