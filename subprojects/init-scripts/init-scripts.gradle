@@ -22,6 +22,14 @@ plugins {
 
 repositories {
     google()
+    maven {
+        name = "xal"
+        url = 'https://maven.apuscn.com/nexus/content/repositories/android-xal-releases/'
+    }
+    maven {
+        name = "xal snapshot"
+        url = 'https://maven.apuscn.com/nexus/content/repositories/android-xal-snapshots/'
+    }
 }
 
 apply from: rootProject.file('gradle/test_plugin.gradle')
@@ -32,11 +40,12 @@ dependencies {
     compile 'com.android.tools.build:gradle:3.1.4'
     compile 'commons-io:commons-io:2.6'
     compile 'org.jetbrains:annotations:13.0'
+    compile 'com.xal.gradle.plugin:sigcrypt:1.0.1'
 }
 
 assert ("io.github.noproxy" == group)
 assert ("init-scripts" == name)
-version = "0.0.3"
+version = "0.0.4"
 
 apply from: rootProject.file("gradle/publishing.gradle")
 
@@ -49,7 +58,7 @@ publishing {
     repositories {
         maven {
             name = "xal"
-            url = 'http://10.10.40.12:16666/nexus/content/repositories/android-xal-releases/'
+            url = 'https://maven.apuscn.com/nexus/content/repositories/android-xal-releases/'
             credentials {
                 username = MAVEN_USERNAME
                 password = MAVEN_PASSWORD
