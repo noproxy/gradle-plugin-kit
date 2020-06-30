@@ -25,6 +25,7 @@ initscript {
         mavenLocal()
         maven { url 'https://plugins.gradle.org/m2/' }
         maven { url 'https://maven.apuscn.com/nexus/content/repositories/android-xal-releases/' }
+        maven { url 'https://maven.apuscn.com/nexus/content/repositories/android-xal-snapshots/' }
         google()
         jcenter()
     }
@@ -33,7 +34,7 @@ initscript {
     }
 }
 
+
 logger.quiet("init script 'io.github.noproxy:init-scripts applied. version: 0.0.4")
 apply plugin: Class.forName('io.github.noproxy.init.CheckManifestPlugin')
 apply plugin: Class.forName('io.github.noproxy.init.JniLibsNotStrippedPlugin')
-apply plugin: Class.forName('io.github.noproxy.init.SigcryptInitPlugin')
