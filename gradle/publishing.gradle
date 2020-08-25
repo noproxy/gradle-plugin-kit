@@ -53,6 +53,15 @@ publishing {
             name = "BuildDir"
             url = uri(rootProject.file("build/repo"))
         }
+        if (project.hasProperty('RELEASE_REPOSITORY_URL')) {
+            maven {
+                url = RELEASE_REPOSITORY_URL
+                credentials {
+                    username = MAVEN_USERNAME
+                    password = MAVEN_PASSWORD
+                }
+            }
+        }
     }
     def configurePublishingTaskGroup = { String repoName ->
         tasks.all { task ->
