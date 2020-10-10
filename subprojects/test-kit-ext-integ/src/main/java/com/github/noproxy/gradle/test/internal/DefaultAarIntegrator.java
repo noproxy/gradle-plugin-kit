@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 
 class DefaultAarIntegrator extends DefaultZipIntegrator implements AarIntegrator {
-    private final AndroidIntegrator androidIntegrator = new DefaultAndroidIntegrator(this);
+    private final AndroidIntegrator androidIntegrator = Integrators.android(this);
 
     DefaultAarIntegrator(@NotNull File destZipFile, @NotNull FileIntegratorInternal parent) {
         super(destZipFile, parent);

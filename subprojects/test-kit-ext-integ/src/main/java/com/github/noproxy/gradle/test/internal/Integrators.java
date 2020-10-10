@@ -33,6 +33,12 @@ public class Integrators {
         return integrator;
     }
 
+    static AndroidIntegrator android(FileIntegrator closer) {
+        final AndroidIntegrator integrator = new DefaultAndroidIntegrator(closer);
+//        ((FileIntegratorInternal) closer).addCloseable(integrator);
+        return integrator;
+    }
+
     public static ProjectIntegrator project(FileIntegrator closer) {
         final DefaultProjectIntegrator integrator = new DefaultProjectIntegrator(closer);
         ((FileIntegratorInternal) closer).addCloseable(integrator);

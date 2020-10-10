@@ -17,21 +17,28 @@
 package com.github.noproxy.gradle.test.internal;
 
 import com.github.noproxy.gradle.test.api.AndroidIntegrator;
+import com.github.noproxy.gradle.test.api.FileIntegrator;
+import com.github.noproxy.gradle.test.api.ManifestIntegrator;
 import groovy.lang.Closure;
 
 import java.io.File;
 
 class DefaultAndroidIntegrator implements AndroidIntegrator {
     private static final String ANDROID_MANIFEST_XML_PATH = "src/main/AndroidManifest.xml";
-    private final FileIntegratorInternal integrator;
+    private final FileIntegrator integrator;
 
-    DefaultAndroidIntegrator(FileIntegratorInternal dir) {
+    DefaultAndroidIntegrator(FileIntegrator dir) {
         this.integrator = dir;
     }
 
     @Override
     public void manifest(String content) {
-        Actions.setText(content).execute(integrator.newFile(ANDROID_MANIFEST_XML_PATH));
+        Actions.setText(content).execute(integrator.file(ANDROID_MANIFEST_XML_PATH));
+
+        final File manifest = integrator.file(ANDROID_MANIFEST_XML_PATH);
+        final ManifestIntegrator manifestIntegrator = Integrators.manifest(manifest, integrator);
+
+        manifestIntegrator.setContent(content);
     }
 
     @Override

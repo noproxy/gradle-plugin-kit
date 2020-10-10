@@ -125,7 +125,7 @@ class DefaultProjectIntegrator implements ProjectIntegrator {
 
     @Override
     public void android(Closure androidConfigure) {
-        final AndroidIntegrator android = new DefaultAndroidIntegrator(integrator);
+        final AndroidIntegrator android = Integrators.android(integrator);
         androidConfigure = (Closure) androidConfigure.clone();
         androidConfigure.setDelegate(android);
         androidConfigure.call();

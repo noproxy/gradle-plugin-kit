@@ -205,8 +205,15 @@ public class DefaultFileIntegrator implements FileIntegrator, FileIntegratorInte
     // TODO use Junit Rule impl auto close
     @Override
     public void close() throws IOException {
+        if (close) {
+            return;
+        }
+
+        close = true;
         children.forEach(closeable -> Actions.close().execute(closeable));
     }
+
+    private boolean close = false;
 
     @Override
     public void addCloseable(Closeable closeable) {

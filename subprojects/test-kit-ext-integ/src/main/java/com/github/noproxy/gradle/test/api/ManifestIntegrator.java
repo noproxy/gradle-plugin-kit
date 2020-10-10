@@ -20,4 +20,6 @@ import java.io.Closeable;
 
 public interface ManifestIntegrator extends Closeable {
     void setPackageName(String packageName);
+
+    void setContent(String content);
 }

@@ -29,6 +29,7 @@ public class DefaultManifestIntegrator implements ManifestIntegrator {
     private static final String MANIFEST_END = "</manifest>";
     private final File manifest;
     private String packageName;
+    private String content;
 
     DefaultManifestIntegrator(File manifest) {
         this.manifest = manifest;
@@ -40,6 +41,19 @@ public class DefaultManifestIntegrator implements ManifestIntegrator {
 
     @Override
     public void close() throws IOException {
+        manifest.getParentFile().mkdirs();
+        Actions.createFile().execute(manifest);
+        if (content != null) {
+            setText(content).execute(manifest);
+
+            // check others
+            if (packageName != null) {
+//                throw new AssertionError("You cannot call setPackageName, because setContent overwrited the AndroidManifest.xml");
+            }
+
+            return;
+        }
+
         setText(MANIFEST_START + getPackageLine(packageName) +
                 "    <application\n" +
                 "        android:label=\"Example App\"\n" +
@@ -55,6 +69,11 @@ public class DefaultManifestIntegrator implements ManifestIntegrator {
 //                "        </activity>\n" +
                 "    </application>\n"
                 + MANIFEST_END).execute(manifest);
+    }
+
+    @Override
+    public void setContent(String content) {
+        this.content = content;
     }
 
     @Override
