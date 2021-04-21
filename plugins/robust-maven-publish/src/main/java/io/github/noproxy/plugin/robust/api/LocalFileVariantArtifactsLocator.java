@@ -40,7 +40,7 @@ public class LocalFileVariantArtifactsLocator implements VariantArtifactsLocator
     private File getArtifactFile(ArtifactType type) {
         switch (type) {
             case METHOD_MAPPING:
-                return Objects.requireNonNull(methodMap, "apk file is null");
+                return Objects.requireNonNull(methodMap, "method mapping file is null");
             case MAPPING:
                 return mapping;
             default:

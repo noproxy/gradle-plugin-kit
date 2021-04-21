@@ -118,21 +118,16 @@ public class DefaultResolver implements Resolver {
         final VariantArtifactsLocator resolveLocator = locatorFactory.createLocator(project, publishExtension, resolverExtension, variant);
 
         final String variantName = capitalize(variant.getName());
-        final Configuration tinkerResolveApkClasspath = maybeCreate("tinkerResolve" + variantName + "ApkClasspath", files -> {
+        final Configuration tinkerResolveApkClasspath = maybeCreate("robustResolve" + variantName + "MethodMapClasspath", files -> {
             files.setCanBeConsumed(false);
             files.setVisible(false);
-            files.setDescription("Configuration to resolve base version of apk files.");
+            files.setDescription("Configuration to resolve base version of method map files.");
 
             project.getDependencies().add(files.getName(), Objects.requireNonNull(resolveLocator.getDependencyNotation(ArtifactType.METHOD_MAPPING)));
         });
 
 
-        final Set<File> apk = tinkerResolveApkClasspath.getResolvedConfiguration().getFiles(resolveLocator.getDependencySpec(ArtifactType.METHOD_MAPPING));
-
-        if (apk.isEmpty()) {
-            return null;
-        }
-
-        return assertSingleton(apk, "Cannot find singleton apk file in Maven repository, we found: " + apk + ", ");
+        final Set<File> methodMapping = tinkerResolveApkClasspath.getResolvedConfiguration().getFiles(resolveLocator.getDependencySpec(ArtifactType.METHOD_MAPPING));
+        return assertSingleton(methodMapping, "Cannot find singleton methodMapping file in Maven repository, we found: " + methodMapping + ", ");
     }
 }

@@ -98,7 +98,7 @@ public class RobustMavenPublishPlugin implements Plugin<Project> {
                 artifact.setClassifier(locator.getClassifier(ArtifactType.METHOD_MAPPING));
             }).builtBy(robustTask);
             if (variant.getBuildType().isMinifyEnabled()) {
-                publication.artifact(variant.getMappingFileProvider().get(), artifact -> {
+                publication.artifact(variant.getMappingFileProvider().get().getSingleFile(), artifact -> {
                     artifact.setExtension(locator.getExtension(ArtifactType.MAPPING));
                     artifact.setClassifier(locator.getClassifier(ArtifactType.MAPPING));
                 });
@@ -137,7 +137,7 @@ public class RobustMavenPublishPlugin implements Plugin<Project> {
                 task.doFirst(ignored -> {
                     File methodMap = methodMapProvider.get();
                     try {
-                        File file = project.file("build/outputs/robust/methodsMap.robust");
+                        File file = project.file("robust/methodsMap.robust");
                         FileUtils.copyFile(methodMap, file);
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);
@@ -151,6 +151,7 @@ public class RobustMavenPublishPlugin implements Plugin<Project> {
                             FileUtils.copyFile(mapping, file);
                         } else {
                             // create empty file
+                            file.getParentFile().mkdirs();
                             file.createNewFile();
                         }
                     } catch (IOException e) {

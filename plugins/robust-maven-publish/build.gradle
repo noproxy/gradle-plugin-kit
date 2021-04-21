@@ -36,8 +36,8 @@ dependencies {
     implementation(gradleApi())
     implementation("org.jetbrains:annotations:13.0")
     implementation("org.apache.commons:commons-lang3:3.9")
-    implementation("com.xal.robust:gradle-plugin:0.0.1-alpha23-SNAPSHOT")
-    implementation("com.xal.robust:auto-patch-plugin:0.0.1-alpha23-SNAPSHOT")
+    implementation("com.xal.robust:gradle-plugin:0.0.1-beta03-SNAPSHOT")
+    implementation("com.xal.robust:auto-patch-plugin:0.0.1-beta03-SNAPSHOT")
 }
 
 repositories {
@@ -51,7 +51,7 @@ dependencies {
 // publishing
 assert ("io.github.noproxy" == group)
 assert ("robust-maven-publish" == name)
-version = "0.0.1"
+version = "0.0.3"
 
 apply from: rootProject.file("gradle/publishing.gradle")
 

@@ -30,9 +30,13 @@ public class DefaultVariantArtifactsLocatorFactory implements VariantArtifactsLo
     @Override
     public VariantArtifactsLocator createLocator(Project project, @NotNull RobustMavenPublishExtensionInternal extension, @NotNull RobustMavenResolverExtensionInternal resolverExtension, @NotNull ApplicationVariant variant) {
         final File methodMap = resolverExtension.getMethodMap();
+        if (methodMap != null) {
+            project.getLogger().info("use local method map for robust: " + methodMap);
+            return new LocalFileVariantArtifactsLocator(project, methodMap, resolverExtension.getMapping());
+        }
 
-        project.getLogger().info("use local methodMap file for tinker: " + methodMap);
-        return new LocalFileVariantArtifactsLocator(project, methodMap, resolverExtension.getMapping());
+        project.getLogger().info("use maven resolve methodMap file for robust: " + methodMap);
+        return new MavenVariantArtifactsLocator(variant, extension.getGroupId(), extension.getArtifactId(), resolverExtension.getVersion());
     }
 
     @NotNull
