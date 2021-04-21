@@ -34,7 +34,7 @@ initscript {
     }
 }
 
-
+// 需要同步到所有Jenkins Node
 logger.quiet("init script 'io.github.noproxy:init-scripts applied. version: 0.0.4")
 apply plugin: Class.forName('io.github.noproxy.init.CheckManifestPlugin')
 apply plugin: Class.forName('io.github.noproxy.init.JniLibsNotStrippedPlugin')

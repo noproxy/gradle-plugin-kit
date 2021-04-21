@@ -20,7 +20,7 @@ sourceSets {
         groovy.srcDir file('src/integrationTest/groovy')
         resources.srcDir file('src/integrationTest/resources')
         compileClasspath += sourceSets.main.output + configurations.testRuntime
-        runtimeClasspath += output + configurations.testRuntime + compileClasspath
+        runtimeClasspath += output + configurations.testRuntimeClasspath + compileClasspath
     }
 }
 

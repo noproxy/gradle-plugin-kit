@@ -21,11 +21,23 @@ plugins {
     id 'io.github.noproxy.android-plugin-kit-plugin' version '0.0.2'
 }
 
+repositories {
+    maven {
+        name = "xal"
+        url = 'https://maven.apuscn.com/nexus/content/repositories/android-xal-releases/'
+    }
+    maven {
+        name = "xal snapshot"
+        url = 'https://maven.apuscn.com/nexus/content/repositories/android-xal-snapshots/'
+    }
+}
+
 dependencies {
     implementation(gradleApi())
     implementation("org.jetbrains:annotations:13.0")
     implementation("org.apache.commons:commons-lang3:3.9")
-    implementation("com.xal.robust:auto-patch-plugin:0.0.1-alpha18-SNAPSHOT")
+    implementation("com.xal.robust:gradle-plugin:0.0.1-alpha23-SNAPSHOT")
+    implementation("com.xal.robust:auto-patch-plugin:0.0.1-alpha23-SNAPSHOT")
 }
 
 repositories {
