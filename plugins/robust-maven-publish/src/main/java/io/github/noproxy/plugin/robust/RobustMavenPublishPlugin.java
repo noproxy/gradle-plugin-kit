@@ -84,20 +84,22 @@ public class RobustMavenPublishPlugin implements Plugin<Project> {
 
     private void configuringAndroidArtifacts(Project project, ApplicationVariant variant,
                                              PublishingExtension publishing, MavenVariantArtifactsLocator locator) {
+        final TaskProvider<Task> robustTask;
+        try {
+            robustTask = project.getTasks().named("transformClassesWithRobustFor" + capitalize(variant.getName()));
+        } catch (UnknownTaskException e) {
+            if (variant.getName().equals("release")) {
+                throw e;
+            }
+            return;
+        }
+
         publishing.getPublications().create("Robust" + capitalize(variant.getName()), MavenPublication.class, publication -> {
             publication.setGroupId(locator.getGroupId());
             publication.setArtifactId(locator.getArtifactId());
             publication.setVersion(locator.getVersion());
 
             final File methodMapping = project.file("build/outputs/robust/methodsMap.robust");
-            TaskProvider<Task> robustTask = null;
-            try {
-                robustTask = project.getTasks().named("transformClassesWithRobustFor" + capitalize(variant.getName()));
-            } catch (UnknownTaskException e) {
-                if (variant.getName().equals("release")) {
-                    throw e;
-                }
-            }
             publication.artifact(methodMapping, artifact -> {
                 artifact.setExtension(locator.getExtension(ArtifactType.METHOD_MAPPING));
                 artifact.setClassifier(locator.getClassifier(ArtifactType.METHOD_MAPPING));

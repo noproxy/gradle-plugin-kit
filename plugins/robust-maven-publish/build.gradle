@@ -51,7 +51,7 @@ dependencies {
 // publishing
 assert ("io.github.noproxy" == group)
 assert ("robust-maven-publish" == name)
-version = "1.0.0-beta02"
+version = "1.0.0-beta03"
 
 apply from: rootProject.file("gradle/publishing.gradle")
 
