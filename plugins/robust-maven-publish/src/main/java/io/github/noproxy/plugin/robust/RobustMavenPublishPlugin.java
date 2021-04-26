@@ -65,8 +65,9 @@ public class RobustMavenPublishPlugin implements Plugin<Project> {
                 .create(RobustMavenResolverExtension.class, "robustResolver",
                         DefaultRobustMavenResolverExtension.class, project);
 
-        project.getPluginManager().withPlugin("robust", appliedPlugin -> project.afterEvaluate(ignored ->
-                configurePublishing(project, publishExtension)));
+        project.getPluginManager().withPlugin("robust", appliedPlugin -> project.afterEvaluate(ignored -> {
+            configurePublishing(project, publishExtension);
+        }));
 
         Resolver resolver = ((ExtensionAware) resolverExtension).getExtensions().create(Resolver.class, "api", DefaultResolver.class,
                 project, resolverExtension, publishExtension);

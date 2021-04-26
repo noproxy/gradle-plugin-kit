@@ -159,7 +159,7 @@ robustResolver {
     version = "1.1"
 }
 dependencies {
-    implementation("com.xal.robust:robust:0.0.1-beta03-SNAPSHOT")
+    implementation("com.xal.robust:robust:1.0.0-beta01")
 }
 """
         newFile("src/main/java/org/example/app/MainActivity.java") << "package org.example.app;\n" +
