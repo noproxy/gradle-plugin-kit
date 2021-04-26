@@ -24,10 +24,7 @@ import io.github.noproxy.plugin.robust.api.RobustMavenPublishExtension;
 import io.github.noproxy.plugin.robust.api.RobustMavenResolverExtension;
 import io.github.noproxy.plugin.robust.internal.*;
 import org.apache.commons.io.FileUtils;
-import org.gradle.api.Action;
-import org.gradle.api.Plugin;
-import org.gradle.api.Project;
-import org.gradle.api.Task;
+import org.gradle.api.*;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.publish.PublishingExtension;
@@ -93,7 +90,14 @@ public class RobustMavenPublishPlugin implements Plugin<Project> {
             publication.setVersion(locator.getVersion());
 
             final File methodMapping = project.file("build/outputs/robust/methodsMap.robust");
-            TaskProvider<Task> robustTask = project.getTasks().named("transformClassesWithRobustFor" + capitalize(variant.getName()));
+            TaskProvider<Task> robustTask = null;
+            try {
+                robustTask = project.getTasks().named("transformClassesWithRobustFor" + capitalize(variant.getName()));
+            } catch (UnknownTaskException e) {
+                if (variant.getName().equals("release")) {
+                    throw e;
+                }
+            }
             publication.artifact(methodMapping, artifact -> {
                 artifact.setExtension(locator.getExtension(ArtifactType.METHOD_MAPPING));
                 artifact.setClassifier(locator.getClassifier(ArtifactType.METHOD_MAPPING));
