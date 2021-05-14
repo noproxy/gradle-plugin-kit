@@ -25,7 +25,7 @@ asciidoctor {
     }
     attributes(
             toc: 'left',
-            toclevels: 2,
+            toclevels: 3,
             'source-highlighter': 'coderay',
             imagesdir: 'images',
             icons: 'font'
