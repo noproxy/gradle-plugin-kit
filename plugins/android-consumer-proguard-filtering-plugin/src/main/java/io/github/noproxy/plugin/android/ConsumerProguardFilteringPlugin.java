@@ -117,8 +117,8 @@ public class ConsumerProguardFilteringPlugin implements Plugin<Project> {
                 final ProguardConfigurable proguardOrR8Transform;
                 final CodeShrinker codeShrinker = androidHideApi.getCodeShrinker(variant);
                 proguardOrR8Transform = (ProguardConfigurable) project.getTasks().withType(TransformTask.class)
-                        .getByName("transformClassesAndResourcesWith" + capitalize(((CharSequence) codeShrinker.toString().toLowerCase())) +
-                                "For" + capitalize(((CharSequence) variant.getName()))
+                        .getByName("transformClassesAndResourcesWith" + capitalize((CharSequence) codeShrinker.toString().toLowerCase()) +
+                                "For" + capitalize((CharSequence) variant.getName())
                         )
                         .getTransform();
 

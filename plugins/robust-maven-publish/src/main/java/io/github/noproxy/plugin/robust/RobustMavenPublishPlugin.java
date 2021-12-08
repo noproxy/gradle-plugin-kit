@@ -86,7 +86,7 @@ public class RobustMavenPublishPlugin implements Plugin<Project> {
                                              PublishingExtension publishing, MavenVariantArtifactsLocator locator) {
         final TaskProvider<Task> robustTask;
         try {
-            robustTask = project.getTasks().named("transformClassesWithRobustFor" + capitalize(variant.getName()));
+            robustTask = project.getTasks().named("transformClassesWithRobustFor" + capitalize((CharSequence) variant.getName()));
         } catch (UnknownTaskException e) {
             if (variant.getName().equals("release")) {
                 throw e;
@@ -94,7 +94,7 @@ public class RobustMavenPublishPlugin implements Plugin<Project> {
             return;
         }
 
-        publishing.getPublications().create("Robust" + capitalize(variant.getName()), MavenPublication.class, publication -> {
+        publishing.getPublications().create("Robust" + capitalize((CharSequence) variant.getName()), MavenPublication.class, publication -> {
             publication.setGroupId(locator.getGroupId());
             publication.setArtifactId(locator.getArtifactId());
             publication.setVersion(locator.getVersion());
@@ -117,7 +117,7 @@ public class RobustMavenPublishPlugin implements Plugin<Project> {
 
     private void configureResolving(Project project, Resolver resolver) {
         withApplicationVariants(project, variant -> {
-            final String variantName = capitalize(variant.getName());
+            final String variantName = capitalize((CharSequence) variant.getName());
             TaskProvider<Task> robustTask = project.getTasks().named("transformClassesWithAutoPatchTransformFor" + variantName);
 
             robustTask.configure(task -> {
