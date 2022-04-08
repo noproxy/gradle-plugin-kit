@@ -41,7 +41,7 @@ dependencies {
 // publishing
 assert ("io.github.noproxy" == group)
 assert ("android-consumer-proguard-filtering-plugin" == name)
-version = "0.0.1"
+version = "0.0.2"
 
 apply from: rootProject.file("gradle/publishing.gradle")
 
