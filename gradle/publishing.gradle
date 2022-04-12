@@ -49,10 +49,10 @@ static def toSpacedString(String text) {
 
 publishing {
     repositories {
-        maven {
-            name = "BuildDir"
-            url = uri(rootProject.file("build/repo"))
-        }
+//        maven {
+//            name = "BuildDir"
+//            url = uri(rootProject.file("build/repo"))
+//        }
         if (project.hasProperty('RELEASE_REPOSITORY_URL')) {
             maven {
                 url = RELEASE_REPOSITORY_URL

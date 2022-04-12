@@ -19,10 +19,9 @@ package io.github.noproxy.plugin.android;
 import com.android.build.gradle.AppExtension;
 import com.android.build.gradle.BasePlugin;
 import com.android.build.gradle.api.ApplicationVariant;
-import com.android.build.gradle.internal.pipeline.TransformTask;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts;
-import com.android.build.gradle.internal.scope.CodeShrinker;
-import com.android.build.gradle.internal.transforms.ProguardConfigurable;
+import com.android.build.gradle.internal.tasks.ProguardConfigurableTask;
+import com.android.builder.model.CodeShrinker;
 import com.github.noproxy.android.api.AndroidHideApi;
 import com.github.noproxy.android.internal.DefaultAndroidHideApi;
 import io.github.noproxy.plugin.android.internal.DefaultConsumerProguardFilteringExtension;
@@ -44,9 +43,9 @@ import static org.codehaus.groovy.runtime.StringGroovyMethods.capitalize;
 @SuppressWarnings("unused")
 public class ConsumerProguardFilteringPlugin implements Plugin<Project> {
 
-    private ConfigurableFileCollection getConfigurationFiles(ProguardConfigurable transform) {
+    private ConfigurableFileCollection getConfigurationFiles(ProguardConfigurableTask transform) {
         try {
-            final Field field = ProguardConfigurable.class.getDeclaredField("configurationFiles");
+            final Field field = ProguardConfigurableTask.class.getDeclaredField("configurationFiles");
             field.setAccessible(true);
             return (ConfigurableFileCollection) field.get(transform);
         } catch (NoSuchFieldException | IllegalAccessException e) {
@@ -114,13 +113,10 @@ public class ConsumerProguardFilteringPlugin implements Plugin<Project> {
                     return;
                 }
 
-                final ProguardConfigurable proguardOrR8Transform;
+                final ProguardConfigurableTask proguardOrR8Transform;
                 final CodeShrinker codeShrinker = androidHideApi.getCodeShrinker(variant);
-                proguardOrR8Transform = (ProguardConfigurable) project.getTasks().withType(TransformTask.class)
-                        .getByName("transformClassesAndResourcesWith" + capitalize((CharSequence) codeShrinker.toString().toLowerCase()) +
-                                "For" + capitalize((CharSequence) variant.getName())
-                        )
-                        .getTransform();
+                proguardOrR8Transform = project.getTasks().withType(ProguardConfigurableTask.class)
+                        .getByName("minify" + capitalize((CharSequence) variant.getName()) + "With" + capitalize((CharSequence) codeShrinker.toString().toLowerCase()));
 
                 final ConfigurableFileCollection configurationFiles = getConfigurationFiles(proguardOrR8Transform);
                 final Set<Object> originFiles = new HashSet<>(configurationFiles.getFrom());

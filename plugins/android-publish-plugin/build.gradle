@@ -17,7 +17,7 @@
 plugins {
     id 'java-gradle-plugin'
     id 'groovy'
-    id 'com.gradle.plugin-publish' version '0.10.1'
+    id 'com.gradle.plugin-publish' version '0.11.0'
     id 'io.github.noproxy.android-plugin-kit-plugin' version '0.0.2'
 }
 apply from: rootProject.file('gradle/test_plugin.gradle')
